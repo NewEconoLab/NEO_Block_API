@@ -15,16 +15,15 @@ namespace NEO_Block_API.Controllers
     {
         mongoHelper mh = new mongoHelper();
         [HttpGet]
-        public IEnumerable<string> Get()
+        public IEnumerable<string> Get([FromQuery]object[] jsonR)
         {
+            var a = jsonR;
             return new string[] { "testnet1", "testnet2" };
         }
 
         [HttpPost]
-        public string Post([FromBody]JsonRPCrequest jsonR)
+        public JsonResult Post([FromBody]JsonRPCrequest jsonR)
         {
-
-
             JsonRPCrequest req = jsonR; //new JsonRPCrequest(jsonR);
             string findFliter = "{index:" + jsonR.@params[0] + "}";
             JArray result = mh.GetData(mh.mongodbConnStr_testnet, mh.mongodbDatabase_testnet, "block", findFliter);
@@ -34,7 +33,8 @@ namespace NEO_Block_API.Controllers
             res.id = req.id;
             res.result = result;
 
-            return JsonConvert.SerializeObject(res);
+            //return res;
+            return Json(res);
 
             //return "Hello World ";
         }
