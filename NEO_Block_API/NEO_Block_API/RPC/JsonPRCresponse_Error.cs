@@ -7,6 +7,11 @@ namespace NEO_Block_API.RPC
 {
     public class JsonPRCresponse_Error
     {
+        public JsonPRCresponse_Error()
+        {
+            error = new JsonError();
+        }
+
         public string jsonrpc { get; set; }
         public long id { get; set; }
         public JsonError error { get; set; }
