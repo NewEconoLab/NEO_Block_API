@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NEO_Block_API.RPC;
 using NEO_Block_API.lib;
+using Microsoft.AspNetCore.Cors;
 
 namespace NEO_Block_API.Controllers
 {
