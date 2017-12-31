@@ -34,6 +34,10 @@ namespace NEO_Block_API.Controllers
             try {
                 switch (req.method)
                 {
+                    case "getblockheight":
+                        string resultStr = "[{blockheight:" + mh.GetBlockMaxIndex(mh.mongodbConnStr_testnet, mh.mongodbDatabase_testnet) + "}]";
+                        result = JArray.Parse(resultStr);
+                        break;
                     case "getblock":
                         findFliter = "{index:" + req.@params[0] + "}";
                         result = mh.GetData(mh.mongodbConnStr_testnet, mh.mongodbDatabase_testnet, "block", findFliter);
@@ -41,6 +45,10 @@ namespace NEO_Block_API.Controllers
                     case "gettransaction":
                         findFliter = "{txid:'" + formatTxid((string)req.@params[0]) + "'}";
                         result = mh.GetData(mh.mongodbConnStr_testnet, mh.mongodbDatabase_testnet, "tx", findFliter);
+                        break;
+                    case "getasset":
+                        findFliter = "{id:'" + formatTxid((string)req.@params[0]) + "'}";
+                        result = mh.GetData(mh.mongodbConnStr_testnet, mh.mongodbDatabase_testnet, "asset", findFliter);
                         break;
                     case "getfulllog":
                         findFliter = "{txid:'" + formatTxid((string)req.@params[0]) + "'}";

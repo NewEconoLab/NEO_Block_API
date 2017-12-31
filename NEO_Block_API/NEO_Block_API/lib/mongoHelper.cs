@@ -49,5 +49,28 @@ namespace NEO_Block_API.lib
             }
             else { return new JArray(); }      
         }
+
+        public int GetBlockMaxIndex(string mongodbConnStr, string mongodbDatabase)
+        {
+            int maxIndex = -1;
+            var client = new MongoClient(mongodbConnStr);
+            var database = client.GetDatabase(mongodbDatabase);
+            var collection = database.GetCollection<BsonDocument>("block");
+
+            var sortBson = BsonDocument.Parse("{index:-1}");
+            var query = collection.Find(new BsonDocument()).Sort(sortBson).Limit(1).ToList();
+            if (query.Count == 0)
+            {
+                maxIndex = -1;
+            }
+            else
+            {
+                maxIndex = (int)query[0]["index"];
+            }
+
+            client = null;
+
+            return maxIndex;
+        }
     }
 }
