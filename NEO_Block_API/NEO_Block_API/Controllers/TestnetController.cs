@@ -53,7 +53,7 @@ namespace NEO_Block_API.Controllers
                     case "getutxo":
                         if (req.@params.Count() == 1)
                         {
-                            findFliter = "{addr:'" + req.@params[0] + "',vinTx:null}";
+                            findFliter = "{addr:'" + req.@params[0] + "',used:''}";
                         };
                         if (req.@params.Count() == 2)
                         {
