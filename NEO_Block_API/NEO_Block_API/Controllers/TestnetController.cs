@@ -76,7 +76,7 @@ namespace NEO_Block_API.Controllers
                 if (result.Count == 0) {
                     JsonPRCresponse_Error resE = new JsonPRCresponse_Error();
                     resE.jsonrpc = "2.0";
-                    resE.id = 0;
+                    resE.id = req.id;
                     resE.error.code = -1;
                     resE.error.message = "No Data";
                     resE.error.data = "Data does not exist";
