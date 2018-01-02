@@ -31,7 +31,8 @@ namespace NEO_Block_API.Controllers
         {
             JArray result = new JArray();
             string findFliter = string.Empty;
-            //try {
+            try
+            {
                 switch (req.method)
                 {
                     case "getblockheight":
@@ -90,7 +91,8 @@ namespace NEO_Block_API.Controllers
                         foreach (KeyValuePair<string,decimal> kv in balance)
                         {
                             JObject j = new JObject();
-                            j.Add(kv.Key, kv.Value);
+                            j.Add("asset",kv.Key);
+                            j.Add("balance", kv.Value);
                             balanceJA.Add(j);
                         }
                         result = balanceJA;
@@ -106,19 +108,19 @@ namespace NEO_Block_API.Controllers
 
                     return Json(resE);
                 }
-            //}
-            //catch (Exception e)
-            //{
-            //    JsonPRCresponse_Error resE = new JsonPRCresponse_Error();
-            //    resE.jsonrpc = "2.0";
-            //    resE.id = 0;
-            //    resE.error.code = -100;
-            //    resE.error.message = "Parameter Error";
-            //    resE.error.data = e.Message;
+            }
+            catch (Exception e)
+            {
+                JsonPRCresponse_Error resE = new JsonPRCresponse_Error();
+                resE.jsonrpc = "2.0";
+                resE.id = 0;
+                resE.error.code = -100;
+                resE.error.message = "Parameter Error";
+                resE.error.data = e.Message;
 
-            //    return Json(resE);
+                return Json(resE);
 
-            //}
+            }
 
             JsonPRCresponse res = new JsonPRCresponse();
             res.jsonrpc = req.jsonrpc;
