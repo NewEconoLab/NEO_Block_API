@@ -31,7 +31,7 @@ namespace NEO_Block_API.Controllers
         {
             JArray result = new JArray();
             string findFliter = string.Empty;
-            try {
+            //try {
                 switch (req.method)
                 {
                     case "getblockheight":
@@ -72,6 +72,29 @@ namespace NEO_Block_API.Controllers
                         }
                         result = mh.GetData(mh.mongodbConnStr_testnet, mh.mongodbDatabase_testnet, "utxo", findFliter);
                         break;
+                    case "getbalance":
+                        findFliter = "{addr:'" + req.@params[0] + "',used:''}";
+                        JArray utxos = mh.GetData(mh.mongodbConnStr_testnet, mh.mongodbDatabase_testnet, "utxo", findFliter);
+                        Dictionary<string, decimal> balance = new Dictionary<string, decimal>();
+                        foreach (JObject j in utxos) {
+                            if (!balance.ContainsKey((string)j["asset"]))
+                            {
+                                balance.Add((string)j["asset"], (decimal)j["value"]);
+                            }
+                            else
+                            {
+                                balance[(string)j["asset"]] += (decimal)j["value"];
+                            }
+                        }
+                        JArray balanceJA = new JArray();
+                        foreach (KeyValuePair<string,decimal> kv in balance)
+                        {
+                            JObject j = new JObject();
+                            j.Add(kv.Key, kv.Value);
+                            balanceJA.Add(j);
+                        }
+                        result = balanceJA;
+                        break;
                 }
                 if (result.Count == 0) {
                     JsonPRCresponse_Error resE = new JsonPRCresponse_Error();
@@ -83,19 +106,19 @@ namespace NEO_Block_API.Controllers
 
                     return Json(resE);
                 }
-            }
-            catch (Exception e)
-            {
-                JsonPRCresponse_Error resE = new JsonPRCresponse_Error();
-                resE.jsonrpc = "2.0";
-                resE.id = 0;
-                resE.error.code = -100;
-                resE.error.message = "Parameter Error";
-                resE.error.data = e.Message;
+            //}
+            //catch (Exception e)
+            //{
+            //    JsonPRCresponse_Error resE = new JsonPRCresponse_Error();
+            //    resE.jsonrpc = "2.0";
+            //    resE.id = 0;
+            //    resE.error.code = -100;
+            //    resE.error.message = "Parameter Error";
+            //    resE.error.data = e.Message;
 
-                return Json(resE);
+            //    return Json(resE);
 
-            }
+            //}
 
             JsonPRCresponse res = new JsonPRCresponse();
             res.jsonrpc = req.jsonrpc;
