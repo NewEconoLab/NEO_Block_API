@@ -93,6 +93,9 @@ namespace NEO_Block_API.Controllers
                             JObject j = new JObject();
                             j.Add("asset",kv.Key);
                             j.Add("balance", kv.Value);
+                            JObject asset = (JObject)mh.GetData(mh.mongodbConnStr_testnet, mh.mongodbDatabase_testnet, "asset", "{id:'" + kv.Key + "'}")[0];
+                            JArray name = (JArray)asset["name"];
+                            j.Add("name", name);
                             balanceJA.Add(j);
                         }
                         result = balanceJA;
