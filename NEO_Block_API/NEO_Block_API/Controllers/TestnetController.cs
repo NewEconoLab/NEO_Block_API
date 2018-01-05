@@ -31,22 +31,51 @@ namespace NEO_Block_API.Controllers
         private JsonResult getRes(JsonRPCrequest req)
         {
             JArray result = new JArray();
+            string resultStr = string.Empty;
             string findFliter = string.Empty;
+            string sortStr = string.Empty;
             try
             {
                 switch (req.method)
                 {
-                    case "getblockheight":
-                        string resultStr = "[{blockheight:" + mh.GetBlockMaxIndex(mh.mongodbConnStr_testnet, mh.mongodbDatabase_testnet) + "}]";
+                    case "getnoderpcapi":
+                        JArray JA = new JArray
+                        {
+                            new JObject {
+                                { "nodeType","testnet" },
+                                { "nodeList",new JArray{
+                                    "47.96.168.8:20332"}
+                                }
+                            }
+                        };
+                        result = JA;
+                        break;
+                    case "getdatablockheight":
+                        result = mh.Getdatablockheight(mh.mongodbConnStr_testnet, mh.mongodbDatabase_testnet);
+                        break;
+                    case "getblockcount":
+                        resultStr = "[{blockcount:" + mh.GetDataCount(mh.mongodbConnStr_testnet, mh.mongodbDatabase_testnet,"block") + "}]";
+                        result = JArray.Parse(resultStr);
+                        break;
+                    case "gettxcount":
+                        resultStr = "[{txcount:" + mh.GetDataCount(mh.mongodbConnStr_testnet, mh.mongodbDatabase_testnet,"tx") + "}]";
                         result = JArray.Parse(resultStr);
                         break;
                     case "getblock":
                         findFliter = "{index:" + req.@params[0] + "}";
                         result = mh.GetData(mh.mongodbConnStr_testnet, mh.mongodbDatabase_testnet, "block", findFliter);
                         break;
-                    case "gettransaction":
+                    case "getblocks":
+                        sortStr = "{index:-1}";
+                        result = mh.GetDataPages(mh.mongodbConnStr_testnet, mh.mongodbDatabase_testnet, "block", sortStr,int.Parse(req.@params[0].ToString()), int.Parse(req.@params[1].ToString()));
+                        break;
+                    case "getrawtransaction":
                         findFliter = "{txid:'" + formatTxid((string)req.@params[0]) + "'}";
                         result = mh.GetData(mh.mongodbConnStr_testnet, mh.mongodbDatabase_testnet, "tx", findFliter);
+                        break;
+                    case "getrawtransactions":
+                        sortStr = "{blockindex:-1,txid:-1}";
+                        result = mh.GetDataPages(mh.mongodbConnStr_testnet, mh.mongodbDatabase_testnet, "tx", sortStr, int.Parse(req.@params[0].ToString()), int.Parse(req.@params[1].ToString()));
                         break;
                     case "getasset":
                         findFliter = "{id:'" + formatTxid((string)req.@params[0]) + "'}";

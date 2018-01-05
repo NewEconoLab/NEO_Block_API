@@ -50,27 +50,93 @@ namespace NEO_Block_API.lib
             else { return new JArray(); }      
         }
 
-        public int GetBlockMaxIndex(string mongodbConnStr, string mongodbDatabase)
+        public JArray GetDataPages(string mongodbConnStr, string mongodbDatabase, string coll,string sortStr, int pageCount, int pageNum)
         {
-            int maxIndex = -1;
             var client = new MongoClient(mongodbConnStr);
             var database = client.GetDatabase(mongodbDatabase);
-            var collection = database.GetCollection<BsonDocument>("block");
+            var collection = database.GetCollection<BsonDocument>(coll);
 
+            List<BsonDocument> query = collection.Find(new BsonDocument()).Sort(sortStr).Skip(pageCount * pageNum).Limit(pageCount).ToList();
+            client = null;
+
+            if (query.Count > 0)
+            {
+
+                var jsonWriterSettings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
+                JArray JA = JArray.Parse(query.ToJson(jsonWriterSettings));
+                foreach (JObject j in JA)
+                {
+                    j.Remove("_id");
+                }
+                return JA;
+            }
+            else { return new JArray(); }
+        }
+
+        public long GetDataCount(string mongodbConnStr, string mongodbDatabase,string coll)
+        {
+            var client = new MongoClient(mongodbConnStr);
+            var database = client.GetDatabase(mongodbDatabase);
+            var collection = database.GetCollection<BsonDocument>(coll);
+
+            var txCount = collection.Find(new BsonDocument()).Count();
+
+            client = null;
+
+            return txCount;
+        }
+
+        public JArray Getdatablockheight(string mongodbConnStr, string mongodbDatabase)
+        {
+            int blockDataHeight = -1;
+            int txDataHeight = -1;
+            int utxoDataHeight = -1;
+            int notifyDataHeight = -1;
+            int fulllogDataHeight = -1;
+
+            var client = new MongoClient(mongodbConnStr);
+            var database = client.GetDatabase(mongodbDatabase);
+
+            var collection = database.GetCollection<BsonDocument>("block");
             var sortBson = BsonDocument.Parse("{index:-1}");
             var query = collection.Find(new BsonDocument()).Sort(sortBson).Limit(1).ToList();
-            if (query.Count == 0)
+            if (query.Count > 0)
+            {blockDataHeight = (int)query[0]["index"];}
+
+            collection = database.GetCollection<BsonDocument>("tx");
+            sortBson = BsonDocument.Parse("{blockindex:-1}");
+            query = collection.Find(new BsonDocument()).Sort(sortBson).Limit(1).ToList();
+            if (query.Count > 0)
+            { txDataHeight = (int)query[0]["blockindex"]; }
+
+            collection = database.GetCollection<BsonDocument>("system_counter");
+            query = collection.Find(new BsonDocument()).ToList();
+            if (query.Count > 0)
             {
-                maxIndex = -1;
-            }
-            else
-            {
-                maxIndex = (int)query[0]["index"];
+                foreach (var q in query)
+                {
+                    if ((string)q["counter"] == "utxo") { utxoDataHeight = (int)q["lastBlockindex"]; };
+                    if ((string)q["counter"] == "notify") { notifyDataHeight = (int)q["lastBlockindex"]; };
+                    if ((string)q["counter"] == "fulllog") { fulllogDataHeight = (int)q["lastBlockindex"]; };
+                }
             }
 
             client = null;
 
-            return maxIndex;
+            JObject J = new JObject
+            {
+                { "blockDataHeight", blockDataHeight },
+                { "txDataHeight", txDataHeight },
+                { "utxoDataHeight", utxoDataHeight },
+                { "notifyDataHeight", notifyDataHeight },
+                { "fulllogDataHeight", fulllogDataHeight }
+            };
+            JArray JA = new JArray
+            {
+                J
+            };
+
+            return JA;
         }
     }
 }
