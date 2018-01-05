@@ -20,7 +20,8 @@ namespace NEO_Block_API.Controllers
         private string formatTxid(string txid)
         {
             string result = txid.ToLower();
-            if (result.Length == 64) {
+            if (result.Length == 64)
+            {
                 result = "0x" + result;
             }
 
@@ -77,7 +78,8 @@ namespace NEO_Block_API.Controllers
                         findFliter = "{addr:'" + req.@params[0] + "',used:''}";
                         JArray utxos = mh.GetData(mh.mongodbConnStr_testnet, mh.mongodbDatabase_testnet, "utxo", findFliter);
                         Dictionary<string, decimal> balance = new Dictionary<string, decimal>();
-                        foreach (JObject j in utxos) {
+                        foreach (JObject j in utxos)
+                        {
                             if (!balance.ContainsKey((string)j["asset"]))
                             {
                                 balance.Add((string)j["asset"], (decimal)j["value"]);
@@ -88,10 +90,10 @@ namespace NEO_Block_API.Controllers
                             }
                         }
                         JArray balanceJA = new JArray();
-                        foreach (KeyValuePair<string,decimal> kv in balance)
+                        foreach (KeyValuePair<string, decimal> kv in balance)
                         {
                             JObject j = new JObject();
-                            j.Add("asset",kv.Key);
+                            j.Add("asset", kv.Key);
                             j.Add("balance", kv.Value);
                             JObject asset = (JObject)mh.GetData(mh.mongodbConnStr_testnet, mh.mongodbDatabase_testnet, "asset", "{id:'" + kv.Key + "'}")[0];
                             JArray name = (JArray)asset["name"];
@@ -101,7 +103,8 @@ namespace NEO_Block_API.Controllers
                         result = balanceJA;
                         break;
                 }
-                if (result.Count == 0) {
+                if (result.Count == 0)
+                {
                     JsonPRCresponse_Error resE = new JsonPRCresponse_Error();
                     resE.jsonrpc = "2.0";
                     resE.id = req.id;
@@ -164,8 +167,33 @@ namespace NEO_Block_API.Controllers
         }
 
         [HttpPost]
-        public JsonResult Post([FromBody]JsonRPCrequest req)
+        public async Task<JsonResult> Post()
         {
+            var ctype = HttpContext.Request.ContentType;
+            LitServer.FormData form = null;
+            JsonRPCrequest req = null;
+            if (ctype == "application/x-www-form-urlencoded" ||
+                 (ctype.IndexOf("multipart/form-data;") == 0))
+            {
+                form = await LitServer.FormData.FromRequest(HttpContext.Request);
+                var _jsonrpc = form.mapParams["jsonrpc"];
+                var _id = long.Parse(form.mapParams["id"]);
+                var _method = form.mapParams["method"];
+                var _strparams = form.mapParams["params"];
+                var _params = JArray.Parse(_strparams);
+                req = new JsonRPCrequest
+                {
+                    jsonrpc = _jsonrpc,
+                    method = _method,
+                    @params = JsonConvert.DeserializeObject<object[]>(JsonConvert.SerializeObject(_params)),
+                    id = _id
+                };
+            }
+            else// if (ctype == "application/json") 其他所有请求方式都这样取好了
+            {
+                var text = await LitServer.FormData.GetStringFromRequest(HttpContext.Request);
+                req = JsonConvert.DeserializeObject<JsonRPCrequest>(text);
+            }
             return getRes(req);
         }
 
