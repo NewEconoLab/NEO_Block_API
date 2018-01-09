@@ -131,6 +131,10 @@ namespace NEO_Block_API.Controllers
                         }
                         result = balanceJA;
                         break;
+                    case "getcontractscript":
+                        findFliter = "{hash:'" + (string)req.@params[0] + "'}";
+                        result = mh.GetData(mh.mongodbConnStr_NeonOnline, mh.mongodbDatabase_NeonOnline, "contractWarehouse", findFliter);
+                        break;
                 }
                 if (result.Count == 0)
                 {

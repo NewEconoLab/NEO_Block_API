@@ -15,6 +15,8 @@ namespace NEO_Block_API.lib
     {
         public string mongodbConnStr_testnet = string.Empty;
         public string mongodbDatabase_testnet = string.Empty;
+        public string mongodbConnStr_NeonOnline = string.Empty;
+        public string mongodbDatabase_NeonOnline = string.Empty;
 
         public mongoHelper() {
             var config = new ConfigurationBuilder()
@@ -24,7 +26,8 @@ namespace NEO_Block_API.lib
                 .Build();    //编译成对象  
             mongodbConnStr_testnet = config["mongodbConnStr_testnet"];
             mongodbDatabase_testnet = config["mongodbDatabase_testnet"];
-
+            mongodbConnStr_NeonOnline = config["mongodbConnStr_NeonOnline"];
+            mongodbDatabase_NeonOnline = config["mongodbDatabase_NeonOnline"];
         }
 
         public JArray GetData(string mongodbConnStr,string mongodbDatabase, string coll,string findFliter)
