@@ -7,7 +7,8 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NEO_Block_API.RPC;
 using NEO_Block_API.lib;
-using Microsoft.AspNetCore.Cors;
+using Newtonsoft.Json.Linq;
+using System.Net;
 
 namespace NEO_Block_API.Controllers
 {
@@ -134,6 +135,47 @@ namespace NEO_Block_API.Controllers
                     case "getcontractscript":
                         findFliter = "{hash:'" + (string)req.@params[0] + "'}";
                         result = mh.GetData(mh.mongodbConnStr_NeonOnline, mh.mongodbDatabase_NeonOnline, "contractWarehouse", findFliter);
+                        break;
+                    case "setcontractscript":
+                        string ipAddr = Request.HttpContext.Connection.RemoteIpAddress.ToString();
+                        JObject J = JObject.Parse((string)req.@params[0]);
+                        string hash = (string)J["hash"];
+                        //string hash = (string)req.@params[0];
+                        //J.Add("hash", hash);
+                        //J.Add("avm", (string)req.@params[1]);
+                        //J.Add("cs", (string)req.@params[2]);
+
+                        //string mapStr = (string)req.@params[3];
+                        //string abiStr = (string)req.@params[4];
+
+                        //if (mapStr != null && mapStr != string.Empty)
+                        //{
+                        //    J.Add("map", JArray.Parse((string)req.@params[3]));
+                        //}
+                        //else
+                        //{
+                        //    J.Add("map", string.Empty);
+                        //}
+
+                        //if (abiStr != null && abiStr != string.Empty)
+                        //{
+                        //    J.Add("abi", JObject.Parse((string)req.@params[4]));
+                        //}
+                        //else
+                        //{
+                        //    J.Add("abi", string.Empty);
+                        //}
+
+                        J.Add("requestIP", ipAddr);
+
+                        mh.InsertOneDataByCheckKey(mh.mongodbConnStr_NeonOnline, mh.mongodbDatabase_NeonOnline, "contractWarehouse", J,"hash", hash);
+                        result = new JArray
+                        {
+                            new JObject{
+                                { "isSetSuccess",true }
+                            }
+                        };
+
                         break;
                 }
                 if (result.Count == 0)

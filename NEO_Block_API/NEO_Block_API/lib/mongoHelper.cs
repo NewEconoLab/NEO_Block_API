@@ -141,5 +141,20 @@ namespace NEO_Block_API.lib
 
             return JA;
         }
+
+        public void InsertOneDataByCheckKey(string mongodbConnStr, string mongodbDatabase, string coll, JObject Jdata,string key,string value)
+        {
+            var client = new MongoClient(mongodbConnStr);
+            var database = client.GetDatabase(mongodbDatabase);
+            var collection = database.GetCollection<BsonDocument>(coll);
+
+            var query = collection.Find("{'" + key + "':'" + value +"'}").ToList();
+            if (query.Count == 0) {
+                var strData = Newtonsoft.Json.JsonConvert.SerializeObject(Jdata);
+                collection.InsertOne(BsonDocument.Parse(strData));
+            }
+
+            client = null;
+        }
     }
 }
