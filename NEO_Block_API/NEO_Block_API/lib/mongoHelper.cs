@@ -150,8 +150,10 @@ namespace NEO_Block_API.lib
 
             var query = collection.Find("{'" + key + "':'" + value +"'}").ToList();
             if (query.Count == 0) {
-                var strData = Newtonsoft.Json.JsonConvert.SerializeObject(Jdata);
-                collection.InsertOne(BsonDocument.Parse(strData));
+                string strData = Newtonsoft.Json.JsonConvert.SerializeObject(Jdata);
+                BsonDocument bson = BsonDocument.Parse(strData);
+                bson.Add("getTime", DateTime.Now);
+                collection.InsertOne(bson);
             }
 
             client = null;
