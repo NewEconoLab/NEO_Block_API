@@ -53,13 +53,13 @@ namespace NEO_Block_API.lib
             else { return new JArray(); }      
         }
 
-        public JArray GetDataPages(string mongodbConnStr, string mongodbDatabase, string coll,string sortStr, int pageCount, int pageNum)
+        public JArray GetDataPages(string mongodbConnStr, string mongodbDatabase, string coll,string sortStr, int pageCount, int pageNum, string findBson = "{}")
         {
             var client = new MongoClient(mongodbConnStr);
             var database = client.GetDatabase(mongodbDatabase);
             var collection = database.GetCollection<BsonDocument>(coll);
 
-            List<BsonDocument> query = collection.Find(new BsonDocument()).Sort(sortStr).Skip(pageCount * pageNum).Limit(pageCount).ToList();
+            List<BsonDocument> query = collection.Find(BsonDocument.Parse(findBson)).Sort(sortStr).Skip(pageCount * (pageNum-1)).Limit(pageCount).ToList();
             client = null;
 
             if (query.Count > 0)

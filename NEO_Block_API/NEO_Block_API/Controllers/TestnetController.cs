@@ -76,7 +76,15 @@ namespace NEO_Block_API.Controllers
                         break;
                     case "getrawtransactions":
                         sortStr = "{blockindex:-1,txid:-1}";
-                        result = mh.GetDataPages(mh.mongodbConnStr_testnet, mh.mongodbDatabase_testnet, "tx", sortStr, int.Parse(req.@params[0].ToString()), int.Parse(req.@params[1].ToString()));
+                        findFliter = "{}";
+                        if (req.@params.Count() > 2)
+                        {
+                            string txType = req.@params[2].ToString();
+
+                            if (txType != null && txType != string.Empty)
+                            { findFliter = "{type:'" + txType + "'}"; }
+                        }
+                        result = mh.GetDataPages(mh.mongodbConnStr_testnet, mh.mongodbDatabase_testnet, "tx", sortStr, int.Parse(req.@params[0].ToString()), int.Parse(req.@params[1].ToString()),findFliter);
                         break;
                     case "getasset":
                         findFliter = "{id:'" + formatTxid((string)req.@params[0]) + "'}";
