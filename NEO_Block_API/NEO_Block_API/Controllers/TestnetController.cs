@@ -98,6 +98,10 @@ namespace NEO_Block_API.Controllers
                         findFliter = "{id:'" + formatTxid((string)req.@params[0]) + "'}";
                         result = mh.GetData(mh.mongodbConnStr_testnet, mh.mongodbDatabase_testnet, "asset", findFliter);
                         break;
+                    case "getallasset":
+                        findFliter = "{}";
+                        result = mh.GetData(mh.mongodbConnStr_testnet, mh.mongodbDatabase_testnet, "asset", findFliter);
+                        break;
                     case "getfulllog":
                         findFliter = "{txid:'" + formatTxid((string)req.@params[0]) + "'}";
                         result = mh.GetData(mh.mongodbConnStr_testnet, mh.mongodbDatabase_testnet, "fulllog", findFliter);
