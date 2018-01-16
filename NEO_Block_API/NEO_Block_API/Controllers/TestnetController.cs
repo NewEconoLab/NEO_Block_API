@@ -62,6 +62,10 @@ namespace NEO_Block_API.Controllers
                         resultStr = "[{txcount:" + mh.GetDataCount(mh.mongodbConnStr_testnet, mh.mongodbDatabase_testnet,"tx") + "}]";
                         result = JArray.Parse(resultStr);
                         break;
+                    case "getaddrcount":
+                        resultStr = "[{addrcount:" + mh.GetDataCount(mh.mongodbConnStr_testnet, mh.mongodbDatabase_testnet, "address") + "}]";
+                        result = JArray.Parse(resultStr);
+                        break;
                     case "getblock":
                         findFliter = "{index:" + req.@params[0] + "}";
                         result = mh.GetData(mh.mongodbConnStr_testnet, mh.mongodbDatabase_testnet, "block", findFliter);
@@ -77,6 +81,10 @@ namespace NEO_Block_API.Controllers
                     case "getrawtransactions":
                         sortStr = "{blockindex:-1,txid:-1}";
                         result = mh.GetDataPages(mh.mongodbConnStr_testnet, mh.mongodbDatabase_testnet, "tx", sortStr, int.Parse(req.@params[0].ToString()), int.Parse(req.@params[1].ToString()));
+                        break;
+                    case "getaddrs":
+                        sortStr = "{'lastuse.blockindex' : -1,'lastuse.txid' : -1}";
+                        result = mh.GetDataPages(mh.mongodbConnStr_testnet, mh.mongodbDatabase_testnet, "address", sortStr, int.Parse(req.@params[0].ToString()), int.Parse(req.@params[1].ToString()));
                         break;
                     case "getasset":
                         findFliter = "{id:'" + formatTxid((string)req.@params[0]) + "'}";
