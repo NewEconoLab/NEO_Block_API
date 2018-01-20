@@ -9,6 +9,7 @@ using NEO_Block_API.RPC;
 using NEO_Block_API.lib;
 using Newtonsoft.Json.Linq;
 using System.Net;
+using System.IO;
 
 namespace NEO_Block_API.Controllers
 {
@@ -27,6 +28,106 @@ namespace NEO_Block_API.Controllers
             }
 
             return result;
+        }
+
+        private static string getTransferTxHex(string addrOut, string addrIn, string assetID, decimal amounts)
+        {
+            mongoHelper mh = new mongoHelper();
+
+            ThinNeo.Transaction lastTran;
+
+            string findFliter = "{addr:'" + addrOut + "',used:''}";
+            JArray outputJA = mh.GetData(mh.mongodbConnStr_testnet, mh.mongodbDatabase_testnet, "utxo", findFliter);
+
+            //linq查找指定asset最大的utxo
+            var query = from utxos in outputJA.Children()
+                        where (string)utxos["asset"] == assetID
+                        orderby (decimal)utxos["value"] descending
+                        select utxos;
+            var utxo = query.ToList()[0];
+
+            byte[] utxo_txid = ThinNeo.Helper.HexString2Bytes(((string)utxo["txid"]).Replace("0x", "")).Reverse().ToArray();
+            ushort utxo_n = (ushort)utxo["n"];
+            decimal utxo_value = (decimal)utxo["value"];
+            byte[] assetBytes = ThinNeo.Helper.HexString2Bytes(assetID.Replace("0x", "")).Reverse().ToArray();
+
+            if (amounts > utxo_value)
+            {
+                return string.Empty;
+            }
+
+            lastTran = new ThinNeo.Transaction
+            {
+                type = ThinNeo.TransactionType.ContractTransaction,//转账
+                attributes = new ThinNeo.Attribute[0],
+                inputs = new ThinNeo.TransactionInput[1]
+            };
+            lastTran.inputs[0] = new ThinNeo.TransactionInput
+            {
+                hash = utxo_txid,//用掉指定asset最大的utxo
+                index = utxo_n
+            };
+
+            lastTran.outputs = new ThinNeo.TransactionOutput[2];
+            lastTran.outputs[0] = new ThinNeo.TransactionOutput
+            {
+                assetId = assetBytes,
+                toAddress = ThinNeo.Helper.GetPublicKeyHashFromAddress(addrIn),
+                value = amounts
+            };//给对方转账
+            lastTran.outputs[1] = new ThinNeo.TransactionOutput
+            {
+                assetId = assetBytes,
+                toAddress = ThinNeo.Helper.GetPublicKeyHashFromAddress(addrOut),
+                value = utxo_value - amounts
+            };//给自己找零
+            using (var ms = new System.IO.MemoryStream())
+            {
+                lastTran.SerializeUnsigned(ms);
+                return ThinNeo.Helper.Bytes2HexString(ms.ToArray());
+            }
+        }
+
+        private static JArray sendTxPlusSign(string txScriptHex, string signHex, string publicKeyHex)
+        {
+            byte[] txScript = ThinNeo.Helper.HexString2Bytes(txScriptHex);
+            byte[] sign = ThinNeo.Helper.HexString2Bytes(signHex);
+            byte[] pubkey = ThinNeo.Helper.HexString2Bytes(publicKeyHex);
+            //byte[] prikey = privateKeyHex.HexToBytes();
+
+            //byte[] sign = null;
+
+            //sign = ThinNeo.Helper.Sign(txScript, prikey);
+
+            //var pubkey = ThinNeo.Helper.GetPublicKeyFromPrivateKey(prikey);
+
+            var addr = ThinNeo.Helper.GetAddressFromPublicKey(pubkey);
+
+            ThinNeo.Transaction lastTran = new ThinNeo.Transaction();
+            lastTran.Deserialize(new MemoryStream(txScript));
+            lastTran.witnesses = null;
+            lastTran.AddWitness(sign, pubkey, addr);
+
+            string TxPlusSignStr = string.Empty;
+            using (var ms = new System.IO.MemoryStream())
+            {
+                lastTran.Serialize(ms);
+                TxPlusSignStr = ThinNeo.Helper.Bytes2HexString(ms.ToArray());
+            }
+
+            httpHelper hh = new httpHelper();
+            var resp = hh.Post("http://47.96.168.8:20332", "{'jsonrpc':'2.0','method':'sendrawtransaction','params':['" + TxPlusSignStr +"'],'id':1}", System.Text.Encoding.UTF8, 1);
+
+            return new JArray
+                        {
+                            new JObject
+                            {
+                                {
+                                    "sendrawtransactionresult",
+                                    (bool)JObject.Parse(resp)["result"]
+                                }
+                            }
+                        };
         }
 
         private JsonResult getRes(JsonRPCrequest req)
@@ -155,6 +256,31 @@ namespace NEO_Block_API.Controllers
                     case "getcontractscript":
                         findFliter = "{hash:'" + (string)req.@params[0] + "'}";
                         result = mh.GetData(mh.mongodbConnStr_NeonOnline, mh.mongodbDatabase_NeonOnline, "contractWarehouse", findFliter);
+                        break;
+                    case "gettransfertxhex":
+                        result = new JArray
+                        {
+                            new JObject
+                            {
+                                {
+                                    "transfertxhex",
+                                    getTransferTxHex((string)req.@params[0], (string)req.@params[1], (string)req.@params[2], decimal.Parse(req.@params[3].ToString()))
+                                }
+                            }
+                        };
+                        break;
+                    case "sendtxplussign":
+                        result = sendTxPlusSign((string)req.@params[0], (string)req.@params[1], (string)req.@params[2]);
+                        //new JArray
+                        //    {
+                        //        new JObject
+                        //        {
+                        //            {
+                        //                "sendtxplussign",
+                        //                sendTxPlusSign((string)req.@params[0], (string)req.@params[1], (string)req.@params[2])
+                        //            }
+                        //        }
+                        //    };
                         break;
                     case "setcontractscript":
                         string ipAddr = Request.HttpContext.Connection.RemoteIpAddress.ToString();

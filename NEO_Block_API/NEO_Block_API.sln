@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2010
+VisualStudioVersion = 15.0.27130.2024
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NEO_Block_API", "NEO_Block_API\NEO_Block_API.csproj", "{79A9222C-89EE-443E-8D6A-9D471E569F69}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NEO_Block_API", "NEO_Block_API\NEO_Block_API.csproj", "{79A9222C-89EE-443E-8D6A-9D471E569F69}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
