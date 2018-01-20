@@ -282,6 +282,21 @@ namespace NEO_Block_API.Controllers
                         //        }
                         //    };
                         break;
+                    case "sendrawtransaction":
+                        httpHelper hh = new httpHelper();
+                        var resp = hh.Post("http://47.96.168.8:20332", "{'jsonrpc':'2.0','method':'sendrawtransaction','params':['" + (string)req.@params[0] + "'],'id':1}", System.Text.Encoding.UTF8, 1);
+
+                        result = new JArray
+                        {
+                            new JObject
+                            {
+                                {
+                                    "sendrawtransactionresult",
+                                    (bool)JObject.Parse(resp)["result"]
+                                }
+                            }
+                        };
+                        break;
                     case "setcontractscript":
                         string ipAddr = Request.HttpContext.Connection.RemoteIpAddress.ToString();
                         JObject J = JObject.Parse((string)req.@params[0]);
