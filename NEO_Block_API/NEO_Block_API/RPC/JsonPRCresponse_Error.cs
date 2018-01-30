@@ -12,6 +12,17 @@ namespace NEO_Block_API.RPC
             error = new JsonError();
         }
 
+        public JsonPRCresponse_Error(long reqID,int errCode,string errMsg,string errData)
+        {
+            error = new JsonError();
+
+            jsonrpc = "2.0";
+            id = reqID;
+            error.code = errCode;
+            error.message = errMsg;
+            error.data = errData;
+        }
+
         public string jsonrpc { get; set; }
         public long id { get; set; }
         public JsonError error { get; set; }

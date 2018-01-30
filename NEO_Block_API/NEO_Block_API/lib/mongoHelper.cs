@@ -15,6 +15,12 @@ namespace NEO_Block_API.lib
     {
         public string mongodbConnStr_testnet = string.Empty;
         public string mongodbDatabase_testnet = string.Empty;
+        public string neoCliJsonRPCUrl_testnet = string.Empty;
+
+        public string mongodbConnStr_mainnet = string.Empty;
+        public string mongodbDatabase_mainnet = string.Empty;
+        public string neoCliJsonRPCUrl_mainnet = string.Empty;
+
         public string mongodbConnStr_NeonOnline = string.Empty;
         public string mongodbDatabase_NeonOnline = string.Empty;
 
@@ -26,6 +32,12 @@ namespace NEO_Block_API.lib
                 .Build();    //编译成对象  
             mongodbConnStr_testnet = config["mongodbConnStr_testnet"];
             mongodbDatabase_testnet = config["mongodbDatabase_testnet"];
+            neoCliJsonRPCUrl_testnet = config["neoCliJsonRPCUrl_testnet"];
+
+            mongodbConnStr_mainnet = config["mongodbConnStr_mainnet"];
+            mongodbDatabase_mainnet = config["mongodbDatabase_mainnet"];
+            neoCliJsonRPCUrl_mainnet = config["neoCliJsonRPCUrl_mainnet"];
+
             mongodbConnStr_NeonOnline = config["mongodbConnStr_NeonOnline"];
             mongodbDatabase_NeonOnline = config["mongodbDatabase_NeonOnline"];
         }

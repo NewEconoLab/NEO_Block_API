@@ -40,6 +40,9 @@
     <Reference Include="thinSDK">
       <HintPath>..\..\..\neo-thinsdk-cs\thinSDK\bin\Debug\netcoreapp2.0\thinSDK.dll</HintPath>
     </Reference>
+    <Reference Include="thinSDK_neo">
+      <HintPath>..\..\..\neo-thinsdk-cs\thinSDK_neo\bin\Debug\netcoreapp2.0\thinSDK_neo.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties Properties_4launchSettings_1json__JSONSchema="http://json.schemastore.org/project-1.0.0-beta6" /></VisualStudio></ProjectExtensions>

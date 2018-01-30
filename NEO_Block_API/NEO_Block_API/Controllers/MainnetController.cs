@@ -3,19 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using NEO_Block_API.RPC;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using NEO_Block_API.RPC;
-using NEO_Block_API.lib;
-using System.IO;
 
 namespace NEO_Block_API.Controllers
 {
-    //[RpcRoute("api/[controller]")]
     [Route("api/[controller]")]
-    public class TestnetController : Controller
+    public class MainnetController : Controller
     {
-        Api api = new Api("testnet");
+        Api api = new Api("mainnet");
 
         [HttpGet]
         public JsonResult Get(string @jsonrpc, string @method, string @params, long @id)
@@ -32,7 +29,7 @@ namespace NEO_Block_API.Controllers
                 };
 
                 string ipAddr = Request.HttpContext.Connection.RemoteIpAddress.ToString();
-                return Json(api.getRes(req,ipAddr));
+                return Json(api.getRes(req, ipAddr));
             }
             catch (Exception e)
             {
@@ -73,8 +70,7 @@ namespace NEO_Block_API.Controllers
             }
 
             string ipAddr = Request.HttpContext.Connection.RemoteIpAddress.ToString();
-            return Json(api.getRes(req,ipAddr));
+            return Json(api.getRes(req, ipAddr));
         }
-
     }
 }
