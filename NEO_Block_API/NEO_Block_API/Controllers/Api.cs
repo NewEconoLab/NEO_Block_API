@@ -63,8 +63,8 @@ namespace NEO_Block_API.Controllers
             string resultStr = string.Empty;
             string findFliter = string.Empty;
             string sortStr = string.Empty;
-            try
-            {
+            //try
+            //{
                 switch (req.method)
                 {
                     case "getnoderpcapi":
@@ -273,14 +273,14 @@ namespace NEO_Block_API.Controllers
 
                     return resE;
                 }
-            }
-            catch (Exception e)
-            {
-                JsonPRCresponse_Error resE = new JsonPRCresponse_Error(req.id, -100, "Parameter Error", e.Message);
+            //}
+            //catch (Exception e)
+            //{
+            //    JsonPRCresponse_Error resE = new JsonPRCresponse_Error(req.id, -100, "Parameter Error", e.Message);
 
-                return resE;
+            //    return resE;
 
-            }
+            //}
 
             JsonPRCresponse res = new JsonPRCresponse();
             res.jsonrpc = req.jsonrpc;
