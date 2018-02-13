@@ -49,6 +49,14 @@ namespace NEO_Block_API.Controllers
                         };
         }
 
+        private JArray getJAbyJ(JObject J)
+        {
+            return new JArray
+                        {
+                            J
+                        };
+        }
+
         public object getRes(JsonRPCrequest req,string reqAddr)
         {
             JArray result = new JArray();
@@ -200,10 +208,10 @@ namespace NEO_Block_API.Controllers
                         //};
                         break;
                     case "sendtxplussign":
-                        result = getJAbyKV("sendrawtransactionresult", tx.sendTxPlusSign(neoCliJsonRPCUrl, (string)req.@params[0], (string)req.@params[1], (string)req.@params[2]));
+                        result = getJAbyJ(tx.sendTxPlusSign(neoCliJsonRPCUrl, (string)req.@params[0], (string)req.@params[1], (string)req.@params[2]));
                         break;
                     case "sendrawtransaction":
-                        result = getJAbyKV("sendrawtransactionresult", tx.sendrawtransaction(neoCliJsonRPCUrl, (string)req.@params[0]));
+                        result = getJAbyJ(tx.sendrawtransaction(neoCliJsonRPCUrl, (string)req.@params[0]));
 
                         //result = new JArray
                         //{

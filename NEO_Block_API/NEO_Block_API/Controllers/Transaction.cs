@@ -66,7 +66,7 @@ namespace NEO_Block_API.Controllers
             }
         }
 
-        public bool sendTxPlusSign(string neoCliJsonRPCUrl, string txScriptHex, string signHex, string publicKeyHex)
+        public JObject sendTxPlusSign(string neoCliJsonRPCUrl, string txScriptHex, string signHex, string publicKeyHex)
         {
             byte[] txScript = txScriptHex.HexString2Bytes();
             byte[] sign = signHex.HexString2Bytes();
@@ -96,12 +96,32 @@ namespace NEO_Block_API.Controllers
             return sendrawtransaction(neoCliJsonRPCUrl, TxPlusSignStr);
         }
 
-        public bool sendrawtransaction(string neoCliJsonRPCUrl, string txSigned)
+        public JObject sendrawtransaction(string neoCliJsonRPCUrl, string txSigned)
         {
             httpHelper hh = new httpHelper();
             var resp = hh.Post(neoCliJsonRPCUrl, "{'jsonrpc':'2.0','method':'sendrawtransaction','params':['" + txSigned + "'],'id':1}", System.Text.Encoding.UTF8, 1);
 
-            return (bool)JObject.Parse(resp)["result"];
+            bool isSendSuccess = (bool)JObject.Parse(resp)["result"];
+            JObject Jresult = new JObject();
+            Jresult.Add("sendrawtransactionresult", isSendSuccess);
+            if (isSendSuccess)
+            {
+                ThinNeo.Transaction lastTran = new ThinNeo.Transaction();
+                lastTran.Deserialize(new MemoryStream(txSigned.HexString2Bytes()));
+                string txid = lastTran.GetHash().Reverse().ToArray().ToHexString();
+
+                ////从已签名交易体分析出未签名交易体，并做Hash获得txid
+                //byte[] txUnsigned = txSigned.Split("014140")[0].HexString2Bytes();
+                //string txid = ThinNeo.Helper.Sha256(ThinNeo.Helper.Sha256(txUnsigned)).Reverse().ToArray().ToHexString();
+
+                Jresult.Add("txid", txid);
+            }
+            else {
+                //上链失败则返回空txid
+                Jresult.Add("txid", string.Empty);
+            }
+
+            return Jresult;
         }
     }
 }
