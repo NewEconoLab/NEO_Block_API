@@ -114,6 +114,11 @@ namespace NEO_Block_API.Controllers
                         sortStr = "{'lastuse.blockindex' : -1,'lastuse.txid' : -1}";
                         result = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "address", sortStr, int.Parse(req.@params[0].ToString()), int.Parse(req.@params[1].ToString()));
                         break;
+                    case "getaddresstxs":
+                        string findBson = "{'addr':'" + req.@params[0].ToString() + "'}";
+                        sortStr = "{'blockindex' : -1}";
+                        result = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "address_tx", sortStr, int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()),findBson);
+                        break;
                     case "getasset":
                         findFliter = "{id:'" + ((string)req.@params[0]).formatHexStr() + "'}";
                         result = mh.GetData(mongodbConnStr, mongodbDatabase, "asset", findFliter);
