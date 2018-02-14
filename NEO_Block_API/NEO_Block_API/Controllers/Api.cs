@@ -18,6 +18,7 @@ namespace NEO_Block_API.Controllers
 
         mongoHelper mh = new mongoHelper();
         Transaction tx = new Transaction();
+        Contract ct = new Contract();
 
         public Api(string node) {
             netnode = node;
@@ -63,8 +64,8 @@ namespace NEO_Block_API.Controllers
             string resultStr = string.Empty;
             string findFliter = string.Empty;
             string sortStr = string.Empty;
-            //try
-            //{
+            try
+            {
                 switch (req.method)
                 {
                     case "getnoderpcapi":
@@ -210,6 +211,9 @@ namespace NEO_Block_API.Controllers
                     case "sendtxplussign":
                         result = getJAbyJ(tx.sendTxPlusSign(neoCliJsonRPCUrl, (string)req.@params[0], (string)req.@params[1], (string)req.@params[2]));
                         break;
+                    case "verifytxsign":
+                        result = getJAbyKV("sign", tx.verifyTxSign((string)req.@params[0], (string)req.@params[1]));
+                        break;
                     case "sendrawtransaction":
                         result = getJAbyJ(tx.sendrawtransaction(neoCliJsonRPCUrl, (string)req.@params[0]));
 
@@ -223,6 +227,28 @@ namespace NEO_Block_API.Controllers
                         //        }
                         //    }
                         //};
+                        break;
+                    case "getcontractstate":
+                        result = getJAbyJ(ct.getContractState(neoCliJsonRPCUrl, (string)req.@params[0]));
+
+                        break;
+                    case "invokescript":
+                        result = getJAbyJ(ct.invokeScript(neoCliJsonRPCUrl, (string)req.@params[0]));
+
+                        break;
+                    case "callcontractfortest":
+                        result = getJAbyJ(ct.callContractForTest(neoCliJsonRPCUrl, (string)req.@params[0], (JArray)req.@params[1]));
+
+                        break;
+                    case "getinvoketxhex":
+                        string addrPayFee = (string)req.@params[0];
+                        findFliter = "{addr:'" + addrPayFee + "',used:''}";
+                        JArray outputJAPayFee = mh.GetData(mongodbConnStr, mongodbDatabase, "utxo", findFliter);
+
+                        string invokeScript = (string)req.@params[1];
+                        decimal invokeScriptFee = decimal.Parse(req.@params[2].ToString());
+
+                        result = getJAbyKV("invoketxhex", tx.getInvokeTxHex(outputJAPayFee, addrPayFee, invokeScript, invokeScriptFee));
                         break;
                     case "setcontractscript":
                         JObject J = JObject.Parse((string)req.@params[0]);
@@ -273,14 +299,14 @@ namespace NEO_Block_API.Controllers
 
                     return resE;
                 }
-            //}
-            //catch (Exception e)
-            //{
-            //    JsonPRCresponse_Error resE = new JsonPRCresponse_Error(req.id, -100, "Parameter Error", e.Message);
+            }
+            catch (Exception e)
+            {
+                JsonPRCresponse_Error resE = new JsonPRCresponse_Error(req.id, -100, "Parameter Error", e.Message);
 
-            //    return resE;
+                return resE;
 
-            //}
+            }
 
             JsonPRCresponse res = new JsonPRCresponse();
             res.jsonrpc = req.jsonrpc;

@@ -98,6 +98,54 @@ namespace NEO_Block_API.Controllers
             }
         }
 
+        public string getInvokeTxHex(JArray utxoJA, string addrOut,string script,decimal scriptFee)
+        {
+            var assetIDStr = "0x602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7"; //选择GAS支付合约调用费用
+            var assetID = assetIDStr.Replace("0x", "").HexString2Bytes().Reverse().ToArray();
+
+            //linq查找指定asset最大的utxo
+            var query = from utxos in utxoJA.Children()
+                        where (string)utxos["asset"] == assetIDStr
+                        orderby (decimal)utxos["value"] descending
+                        select utxos;
+            var utxo = query.ToList()[0];
+            byte[] utxo_txid = ThinNeo.Debug.DebugTool.HexString2Bytes(((string)utxo["txid"]).Replace("0x", "")).Reverse().ToArray();
+            ushort utxo_n = (ushort)utxo["n"];
+            decimal utxo_value = (decimal)utxo["value"];
+
+            //构建交易体
+            ThinNeo.Transaction invokeTran = new ThinNeo.Transaction
+            {
+                type = ThinNeo.TransactionType.InvocationTransaction,//调用合约
+                attributes = new ThinNeo.Attribute[0],
+                inputs = new ThinNeo.TransactionInput[1],
+                outputs = new ThinNeo.TransactionOutput[1],
+                extdata = new ThinNeo.InvokeTransData()
+            };
+            //输入
+            invokeTran.inputs[0] = new ThinNeo.TransactionInput
+            {
+                hash = utxo_txid,
+                index = utxo_n
+            };
+            //找零(输出)
+            invokeTran.outputs[0] = new ThinNeo.TransactionOutput
+            {
+                assetId = assetID,
+                toAddress = ThinNeo.Helper.GetPublicKeyHashFromAddress(addrOut),
+                value = utxo_value //实际应该还要考虑大于10Gas的情况
+            };
+            //调用脚本与费用
+            (invokeTran.extdata as ThinNeo.InvokeTransData).script = script.HexString2Bytes();
+            (invokeTran.extdata as ThinNeo.InvokeTransData).gas = scriptFee;
+
+            using (var ms = new MemoryStream())
+            {
+                invokeTran.SerializeUnsigned(ms);
+                return ms.ToArray().ToHexString();
+            }
+        }
+
         public JObject sendTxPlusSign(string neoCliJsonRPCUrl, string txScriptHex, string signHex, string publicKeyHex)
         {
             byte[] txScript = txScriptHex.HexString2Bytes();
@@ -154,6 +202,11 @@ namespace NEO_Block_API.Controllers
             }
 
             return Jresult;
+        }
+
+        public string verifyTxSign(string script, string prikeyHex)
+        {
+            return ThinNeo.Helper.Sign(script.HexString2Bytes(), prikeyHex.HexString2Bytes()).ToHexString();
         }
     }
 }
