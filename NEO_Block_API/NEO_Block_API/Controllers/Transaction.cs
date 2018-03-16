@@ -18,7 +18,7 @@ namespace NEO_Block_API.Controllers
             //string findFliter = "{addr:'" + addrOut + "',used:''}";
             //JArray outputJA = mh.GetData(mongodbConnStr, mongodbDatabase, "utxo", findFliter);
 
-            //linq查找指定asset最大的utxo
+            //linq查找指定asset
             var query = from utxos in utxoJA.Children()
                         where (string)utxos["asset"] == assetID
                         orderby (decimal)utxos["value"] //descending

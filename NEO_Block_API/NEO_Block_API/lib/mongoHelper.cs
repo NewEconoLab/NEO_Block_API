@@ -170,5 +170,26 @@ namespace NEO_Block_API.lib
 
             client = null;
         }
+
+        public decimal GetTotalSysFeeByBlock(string mongodbConnStr, string mongodbDatabase, int blockindex)
+        {
+            var client = new MongoClient(mongodbConnStr);
+            var database = client.GetDatabase(mongodbDatabase);
+            var collection = database.GetCollection<BsonDocument>("block_sysfee");
+
+            decimal totalSysFee = 0;
+            var query = collection.Find("{'index':" + blockindex + "}").ToList();
+            if (query.Count > 0)
+            {
+                totalSysFee = decimal.Parse(query[0]["totalSysfee"].AsString);
+            }
+            else {
+                totalSysFee = -1;
+            }
+
+            client = null;
+
+            return totalSysFee;
+        }
     }
 }
