@@ -159,20 +159,25 @@ namespace NEO_Block_API.Controllers
                         }
                         result = mh.GetData(mongodbConnStr, mongodbDatabase, "utxo", findFliter);
                         break;
-                    case "getgasissue":
+                    case "getclaimgas":
                         JObject claimsJ = new JObject();
                         if (req.@params.Count() == 1)
                         {
-                            claimsJ = claim.getIssueGas(mongodbConnStr, mongodbDatabase, req.@params[0].ToString());
+                            claimsJ = claim.getClaimGas(mongodbConnStr, mongodbDatabase, req.@params[0].ToString());
                         };
                         if (req.@params.Count() == 2)
                         {
                             if ((Int64)req.@params[1] == 1)
                             {
-                                claimsJ = claim.getIssueGas(mongodbConnStr, mongodbDatabase, req.@params[0].ToString(),false);
+                                claimsJ = claim.getClaimGas(mongodbConnStr, mongodbDatabase, req.@params[0].ToString(),false);
                             }
                         }
                         result = getJAbyJ(claimsJ);
+                        break;
+                    case "getclaimtxhex":
+                        string addrClaim = (string)req.@params[0];
+
+                        result = getJAbyKV("invoketxhex", tx.getClaimTxHex(addrClaim,claim.getClaimGas(mongodbConnStr, mongodbDatabase, addrClaim)));
                         break;
                     case "getbalance":
                         findFliter = "{addr:'" + req.@params[0] + "',used:''}";

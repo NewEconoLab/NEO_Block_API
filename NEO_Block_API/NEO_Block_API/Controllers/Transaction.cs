@@ -98,6 +98,46 @@ namespace NEO_Block_API.Controllers
             }
         }
 
+        public string getClaimTxHex(string addrClaim,JObject claimGas)
+        {
+            var assetIDStr = "0x602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7"; //选择GAS支付合约调用费用
+            var assetID = assetIDStr.Replace("0x", "").HexString2Bytes().Reverse().ToArray();
+
+            //构建交易体
+            ThinNeo.Transaction claimTran = new ThinNeo.Transaction
+            {
+                type = ThinNeo.TransactionType.ClaimTransaction,//领取Gas合约
+                attributes = new ThinNeo.Attribute[0],
+                inputs = new ThinNeo.TransactionInput[0],
+                outputs = new ThinNeo.TransactionOutput[1],
+                extdata = new ThinNeo.ClaimTransData()
+            };
+
+            claimTran.outputs[0] = new ThinNeo.TransactionOutput
+            {
+                assetId = assetID,
+                toAddress = ThinNeo.Helper.GetPublicKeyHashFromAddress(addrClaim),
+                value = (decimal)claimGas["gas"]
+            };
+
+            List<ThinNeo.TransactionInput> claimVins = new List<ThinNeo.TransactionInput>();
+            foreach (JObject j in (JArray)claimGas["claims"])
+            {
+                claimVins.Add(new ThinNeo.TransactionInput {
+                    hash = ThinNeo.Debug.DebugTool.HexString2Bytes(((string)j["txid"]).Replace("0x", "")).Reverse().ToArray(),
+                    index = (ushort)j["n"]
+                });
+            }
+
+            (claimTran.extdata as ThinNeo.ClaimTransData).claims = claimVins.ToArray();
+
+            using (var ms = new MemoryStream())
+            {
+                claimTran.SerializeUnsigned(ms);
+                return ms.ToArray().ToHexString();
+            }
+        }
+
         public string getInvokeTxHex(JArray utxoJA, string addrOut,string script,decimal scriptFee)
         {
             var assetIDStr = "0x602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7"; //选择GAS支付合约调用费用

@@ -11,7 +11,7 @@ namespace NEO_Block_API.Controllers
     {
         mongoHelper mh = new mongoHelper();
 
-        public JObject getIssueGas(string mongodbConnStr, string mongodbDatabase,string address,bool isGetUsed = true)
+        public JObject getClaimGas(string mongodbConnStr, string mongodbDatabase,string address,bool isGetUsed = true)
         {
             decimal issueGas = 0;
 
