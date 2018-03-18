@@ -177,7 +177,7 @@ namespace NEO_Block_API.Controllers
                     case "getclaimtxhex":
                         string addrClaim = (string)req.@params[0];
 
-                        result = getJAbyKV("invoketxhex", tx.getClaimTxHex(addrClaim,claim.getClaimGas(mongodbConnStr, mongodbDatabase, addrClaim)));
+                        result = getJAbyKV("claimtxhex", tx.getClaimTxHex(addrClaim,claim.getClaimGas(mongodbConnStr, mongodbDatabase, addrClaim)));
                         break;
                     case "getbalance":
                         findFliter = "{addr:'" + req.@params[0] + "',used:''}";
