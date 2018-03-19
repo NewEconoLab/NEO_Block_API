@@ -55,5 +55,49 @@ namespace NEO_Block_API.Controllers
 
             return invokeScript(neoCliJsonRPCUrl, scriptPlusParams);
         }
+
+        public JObject publishContractForTest(string neoCliJsonRPCUrl, string avmHexstring, JObject infoJ)
+        {
+            string cName = (string)infoJ["cName"];
+            string cVersion = (string)infoJ["cVersion"];
+            string cAuthor = (string)infoJ["cAuthor"];
+            string cEmail = (string)infoJ["cEmail"];
+            string cDescription = (string)infoJ["cDescription"];         
+            bool iStorage = (bool)infoJ["iStorage"];
+            bool iDyncall = (bool)infoJ["iDyncall"];
+            string inputParamsType = (string)infoJ["inputParamsType"];
+            string outputParamsType = (string)infoJ["outputParamsType"];
+
+            //实例化脚本构造器
+            ThinNeo.ScriptBuilder sb = new ThinNeo.ScriptBuilder();
+            //加入合约基本信息
+            sb.EmitPushString(cDescription);
+            sb.EmitPushString(cEmail);
+            sb.EmitPushString(cAuthor);
+            sb.EmitPushString(cVersion);
+            sb.EmitPushString(cName);
+
+            //加入是否需要私有存储区、是否需要动态合约调用信息
+            int need_storage = iStorage == true ? 1 : 0;
+            int need_nep4 = iDyncall == true ? 2 : 0;
+            sb.EmitPushNumber(need_storage | need_nep4);//二进制或操作
+
+            //加入输入输出参数类型信息
+            var outputType = ThinNeo.Helper.HexString2Bytes(outputParamsType);
+            var inputType = ThinNeo.Helper.HexString2Bytes(inputParamsType);
+            sb.EmitPushBytes(outputType);
+            sb.EmitPushBytes(inputType);
+
+            //加入合约编译后二进制码
+            var contractScript = ThinNeo.Helper.HexString2Bytes(avmHexstring);
+            sb.EmitPushBytes(contractScript);
+
+            sb.EmitSysCall("Neo.Contract.Create");
+
+            string scriptPublish = ThinNeo.Helper.Bytes2HexString(sb.ToArray());
+
+            //调用cli RPC 用neoVM试运行，并获得费用估算
+            return invokeScript(neoCliJsonRPCUrl, scriptPublish);
+        }
     }
 }

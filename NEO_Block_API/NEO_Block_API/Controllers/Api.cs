@@ -261,6 +261,9 @@ namespace NEO_Block_API.Controllers
                         result = getJAbyJ(ct.callContractForTest(neoCliJsonRPCUrl, (string)req.@params[0], (JArray)req.@params[1]));
 
                         break;
+                    case "publishcontractfortest":
+                        result = getJAbyJ(ct.publishContractForTest(neoCliJsonRPCUrl, (string)req.@params[0], (JObject)req.@params[1]));
+                        break;
                     case "getinvoketxhex":
                         string addrPayFee = (string)req.@params[0];
                         findFliter = "{addr:'" + addrPayFee + "',used:''}";
