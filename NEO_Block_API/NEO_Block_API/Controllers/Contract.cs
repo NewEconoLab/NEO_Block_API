@@ -11,6 +11,8 @@ namespace NEO_Block_API.Controllers
 {
     public class Contract
     {
+        httpHelper hh = new httpHelper();
+
         public string hexstring2String(string hexstring){
            return  Encoding.UTF8.GetString(hexstring.HexString2Bytes());
         }
@@ -25,9 +27,19 @@ namespace NEO_Block_API.Controllers
             return resultJ;
         }
 
-        public JObject invokeScript(string neoCliJsonRPCUrl, string script)
+        public JObject getStorage(string neoCliJsonRPCUrl, string contractHash, string keyHexstring)
         {
-            httpHelper hh = new httpHelper();
+            var resp = hh.Post(neoCliJsonRPCUrl, "{'jsonrpc':'2.0','method':'getstorage','params':['" + contractHash + "','" + keyHexstring + "'],'id':1}", System.Text.Encoding.UTF8, 1);
+            string storageValue = (string)JObject.Parse(resp)["result"];
+
+            JObject resultJ = new JObject();
+            resultJ.Add("storagevalue", storageValue);
+
+            return resultJ;
+        }
+
+        public JObject invokeScript(string neoCliJsonRPCUrl, string script)
+        {          
             var resp = hh.Post(neoCliJsonRPCUrl, "{'jsonrpc':'2.0','method':'invokescript','params':['" + script + "'],'id':1}", System.Text.Encoding.UTF8, 1);
 
             JObject resultJ = (JObject)JObject.Parse(resp)["result"];

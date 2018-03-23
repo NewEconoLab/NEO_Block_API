@@ -274,6 +274,10 @@ namespace NEO_Block_API.Controllers
 
                         result = getJAbyKV("invoketxhex", tx.getInvokeTxHex(outputJAPayFee, addrPayFee, invokeScript, invokeScriptFee));
                         break;
+                    case "getstorage":
+                        result = getJAbyJ(ct.getStorage(neoCliJsonRPCUrl, (string)req.@params[0], (string)req.@params[1]));
+
+                        break;
                     case "setcontractscript":
                         JObject J = JObject.Parse((string)req.@params[0]);
                         string hash = (string)J["hash"];
