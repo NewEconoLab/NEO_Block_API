@@ -159,6 +159,25 @@ namespace NEO_Block_API.Controllers
                         }
                         result = mh.GetData(mongodbConnStr, mongodbDatabase, "utxo", findFliter);
                         break;
+                    case "getutxostopay":
+                        string address = (string)req.@params[0];
+                        string assetID = ((string)req.@params[1]).formatHexStr();
+                        decimal amount = decimal.Parse(req.@params[2].ToString());
+                        bool isBigFirst = false; //默认先用小的。
+
+                        if (req.@params.Count() == 4)
+                        {
+                            if ((Int64)req.@params[3] == 1)
+                            {
+                                isBigFirst = true;//加可选参数可以先用大的。
+                            }
+                        }
+
+                        findFliter = "{addr:'" + address + "',used:''}";
+                        JArray utxoJA = mh.GetData(mongodbConnStr, mongodbDatabase, "utxo", findFliter) ;
+
+                        result = tx.getUtxo2Pay(utxoJA, address, assetID, amount, isBigFirst);
+                        break;
                     case "getclaimgas":
                         JObject claimsJ = new JObject();
                         if (req.@params.Count() == 1)

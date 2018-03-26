@@ -11,42 +11,85 @@ namespace NEO_Block_API.Controllers
 {
     public class Transaction
     {
-        public string getTransferTxHex(JArray utxoJA,string addrOut, string addrIn, string assetID, decimal amounts)
+        public JArray getUtxo2Pay(JArray utxoJA,string address,string assetID, decimal amount,bool isBigFirst = false)
         {
-            ThinNeo.Transaction lastTran;
+            IOrderedEnumerable<JToken> query;
 
-            //string findFliter = "{addr:'" + addrOut + "',used:''}";
-            //JArray outputJA = mh.GetData(mongodbConnStr, mongodbDatabase, "utxo", findFliter);
-
-            //linq查找指定asset
-            var query = from utxos in utxoJA.Children()
+            if (isBigFirst)
+            {
+                //linq查找指定asset
+                query = from utxos in utxoJA.Children()
                         where (string)utxos["asset"] == assetID
-                        orderby (decimal)utxos["value"] //descending
+                        orderby (decimal)utxos["value"] descending  //从大到小排序
                         select utxos;
-            //var utxo = query.ToList()[0];
+            }
+            else
+            {
+                //linq查找指定asset
+                query = from utxos in utxoJA.Children()
+                        where (string)utxos["asset"] == assetID
+                        orderby (decimal)utxos["value"]            //从小到大排序
+                        select utxos;
+            }
 
             JArray utxo2pay = new JArray();
             decimal utxo_value = 0; //所有utxo总值
             foreach (JObject utxo in query)
             {
-                if (utxo_value < amounts)//如utxo总值小于需支付则继续加utxo
+                if (utxo_value < amount)//如utxo总值小于需支付则继续加utxo
                 {
                     utxo2pay.Add(utxo);
                     utxo_value += (decimal)utxo["value"];
                 }
                 else { break; }//utxo总值大于等于需支付则跳出
             }
-            var a = JsonConvert.SerializeObject(utxo2pay);
-            //byte[] utxo_txid = ThinNeo.Debug.DebugTool.HexString2Bytes(((string)utxo["txid"]).Replace("0x", "")).Reverse().ToArray();
-            //ushort utxo_n = (ushort)utxo["n"];
-            //decimal utxo_value = (decimal)utxo["value"];
-            byte[] assetBytes = assetID.Replace("0x", "").HexString2Bytes().Reverse().ToArray();
 
-            if (amounts > utxo_value)
+            if (amount > utxo_value)
             {
-                return string.Empty;
+                return new JArray();
             }
 
+            return utxo2pay;
+        }
+
+        public string getTransferTxHex(JArray utxoJA,string addrOut, string addrIn, string assetID, decimal amounts)
+        {          
+            ////string findFliter = "{addr:'" + addrOut + "',used:''}";
+            ////JArray outputJA = mh.GetData(mongodbConnStr, mongodbDatabase, "utxo", findFliter);
+
+            ////linq查找指定asset
+            //var query = from utxos in utxoJA.Children()
+            //            where (string)utxos["asset"] == assetID
+            //            orderby (decimal)utxos["value"] //descending
+            //            select utxos;
+            ////var utxo = query.ToList()[0];
+
+            //JArray utxo2pay = new JArray();
+            //decimal utxo_value = 0; //所有utxo总值
+            //foreach (JObject utxo in query)
+            //{
+            //    if (utxo_value < amounts)//如utxo总值小于需支付则继续加utxo
+            //    {
+            //        utxo2pay.Add(utxo);
+            //        utxo_value += (decimal)utxo["value"];
+            //    }
+            //    else { break; }//utxo总值大于等于需支付则跳出
+            //}
+            ////byte[] utxo_txid = ThinNeo.Debug.DebugTool.HexString2Bytes(((string)utxo["txid"]).Replace("0x", "")).Reverse().ToArray();
+            ////ushort utxo_n = (ushort)utxo["n"];
+            ////decimal utxo_value = (decimal)utxo["value"];           
+
+            //if (amounts > utxo_value)
+            //{
+            //    return string.Empty;
+            //}
+
+            JArray utxo2pay = getUtxo2Pay(utxoJA, addrOut, assetID, amounts);
+            if (utxo2pay == new JArray()) { return string.Empty; }
+
+            byte[] assetBytes = assetID.Replace("0x", "").HexString2Bytes().Reverse().ToArray();
+
+            ThinNeo.Transaction lastTran;
             lastTran = new ThinNeo.Transaction
             {
                 type = ThinNeo.TransactionType.ContractTransaction,//转账
@@ -54,14 +97,16 @@ namespace NEO_Block_API.Controllers
                 inputs = new ThinNeo.TransactionInput[utxo2pay.Count]
             };
             //构造输入
+            decimal utxo_value = 0;//所有utxo总金额
             int i = 0;
             foreach (var utxo in utxo2pay)
             {
                 lastTran.inputs[i] = new ThinNeo.TransactionInput
                 {
                     hash = ((string)utxo["txid"]).Replace("0x", "").HexString2Bytes().Reverse().ToArray(),
-                    index = (ushort)utxo["n"]
+                    index = (ushort)utxo["n"]                   
                 };
+                utxo_value += (decimal)utxo["value"];//加总所有utxo金额
                 i++;
             }
 
