@@ -339,6 +339,34 @@ namespace NEO_Block_API.Controllers
                         //};
 
                         break;
+                    case "getnep5blanceofaddress":
+                        string NEP5scripthash = (string)req.@params[0];
+                        string NEP5address = (string)req.@params[1];
+                        byte[] NEP5addrHash = ThinNeo.Helper.GetPublicKeyHashFromAddress(NEP5address).Reverse().ToArray();
+                        string NEP5addrHashHex = ThinNeo.Helper.Bytes2HexString(NEP5addrHash);
+                        JObject NEP5balanceOfJ = ct.callContractForTest(neoCliJsonRPCUrl, NEP5scripthash, JArray.Parse("['(str)balanceOf',['(hex)" + NEP5addrHashHex + "']]"));
+                        string balanceStr = (string)((JArray)NEP5balanceOfJ["stack"])[0]["value"];
+
+                        string balanceBigint = "0";
+
+                        if (balanceStr != string.Empty)
+                        {
+                            //获取NEP5资产信息，获取精度
+                            NEP5.Asset NEP5asset = new NEP5.Asset(mongodbConnStr, mongodbDatabase, NEP5scripthash);
+
+                            balanceBigint = NEP5.getNumStrFromHexStr(balanceStr, NEP5asset.decimals);
+                        }
+
+                        result = getJAbyKV("nep5blance", balanceBigint);
+                        break;
+                    case "getnep5asset":
+                        findFliter = "{assetid:'" + ((string)req.@params[0]).formatHexStr() + "'}";
+                        result = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5asset", findFliter);
+                        break;
+                    case "getallnep5asset":
+                        findFliter = "{}";
+                        result = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5asset", findFliter);
+                        break;
                 }
                 if (result.Count == 0)
                 {
