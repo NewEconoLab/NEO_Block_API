@@ -127,7 +127,7 @@ namespace NEO_Block_API.Controllers
                     case "getaddresstxs":
                         string findBson = "{'addr':'" + req.@params[0].ToString() + "'}";
                         sortStr = "{'blockindex' : -1}";
-                        result = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "address_tx", sortStr, int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()),findBson);
+                        result = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "address_tx", sortStr, int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()), findBson);
                         break;
                     case "getasset":
                         findFliter = "{id:'" + ((string)req.@params[0]).formatHexStr() + "'}";
@@ -174,7 +174,7 @@ namespace NEO_Block_API.Controllers
                         }
 
                         findFliter = "{addr:'" + address + "',used:''}";
-                        JArray utxoJA = mh.GetData(mongodbConnStr, mongodbDatabase, "utxo", findFliter) ;
+                        JArray utxoJA = mh.GetData(mongodbConnStr, mongodbDatabase, "utxo", findFliter);
 
                         result = tx.getUtxo2Pay(utxoJA, address, assetID, amount, isBigFirst);
                         break;
@@ -188,7 +188,7 @@ namespace NEO_Block_API.Controllers
                         {
                             if ((Int64)req.@params[1] == 1)
                             {
-                                claimsJ = claim.getClaimGas(mongodbConnStr, mongodbDatabase, req.@params[0].ToString(),false);
+                                claimsJ = claim.getClaimGas(mongodbConnStr, mongodbDatabase, req.@params[0].ToString(), false);
                             }
                         }
                         result = getJAbyJ(claimsJ);
@@ -196,7 +196,7 @@ namespace NEO_Block_API.Controllers
                     case "getclaimtxhex":
                         string addrClaim = (string)req.@params[0];
 
-                        result = getJAbyKV("claimtxhex", tx.getClaimTxHex(addrClaim,claim.getClaimGas(mongodbConnStr, mongodbDatabase, addrClaim)));
+                        result = getJAbyKV("claimtxhex", tx.getClaimTxHex(addrClaim, claim.getClaimGas(mongodbConnStr, mongodbDatabase, addrClaim)));
                         break;
                     case "getbalance":
                         findFliter = "{addr:'" + req.@params[0] + "',used:''}";
@@ -364,8 +364,8 @@ namespace NEO_Block_API.Controllers
                         result = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5asset", findFliter);
                         break;
                     case "getallnep5asset":
-                        findFliter = "{}";
-                        result = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5asset", findFliter);
+                        sortStr = "{}";
+                        result = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "NEP5asset", sortStr, int.Parse(req.@params[0].ToString()), int.Parse(req.@params[1].ToString()));
                         break;
                     case "getnep5transferbytxid":
                         string txid = ((string)req.@params[0]).formatHexStr();
@@ -373,10 +373,11 @@ namespace NEO_Block_API.Controllers
                         result = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5transfer", findFliter);
                         break;
                     case "getnep5transferbyaddress":
+                        sortStr = "{'blockindex':1,'txid':1,'n':1}";
                         string NEP5transferAddress = (string)req.@params[0];
                         string NEP5transferAddressType = (string)req.@params[1];
                         findFliter = "{'" + NEP5transferAddressType + "':'" + NEP5transferAddress + "'}";
-                        result = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5transfer", findFliter);
+                        result = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "NEP5transfer", sortStr, int.Parse(req.@params[2].ToString()), int.Parse(req.@params[3].ToString()),findFliter);
                         break;
                     case "getnep5transfers":
                         sortStr = "{'blockindex':1,'txid':1,'n':1}";
