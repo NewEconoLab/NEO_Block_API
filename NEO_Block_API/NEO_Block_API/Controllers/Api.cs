@@ -367,6 +367,21 @@ namespace NEO_Block_API.Controllers
                         findFliter = "{}";
                         result = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5asset", findFliter);
                         break;
+                    case "getnep5transferbytxid":
+                        string txid = ((string)req.@params[0]).formatHexStr();
+                        findFliter = "{txid:'" + txid + "'}";
+                        result = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5transfer", findFliter);
+                        break;
+                    case "getnep5transferbyaddress":
+                        string NEP5transferAddress = (string)req.@params[0];
+                        string NEP5transferAddressType = (string)req.@params[1];
+                        findFliter = "{'" + NEP5transferAddressType + "':'" + NEP5transferAddress + "'}";
+                        result = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5transfer", findFliter);
+                        break;
+                    case "getnep5transfers":
+                        sortStr = "{'blockindex':1,'txid':1,'n':1}";
+                        result = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "NEP5transfer", sortStr, int.Parse(req.@params[0].ToString()), int.Parse(req.@params[1].ToString()));
+                        break;
                 }
                 if (result.Count == 0)
                 {
