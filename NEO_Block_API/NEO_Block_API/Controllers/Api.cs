@@ -16,6 +16,7 @@ namespace NEO_Block_API.Controllers
         private string mongodbDatabase { get; set; }
         private string neoCliJsonRPCUrl { get; set; }
 
+        httpHelper hh = new httpHelper();
         mongoHelper mh = new mongoHelper();
         Transaction tx = new Transaction();
         Contract ct = new Contract();
@@ -69,14 +70,11 @@ namespace NEO_Block_API.Controllers
             {
                 switch (req.method)
                 {
-                    case "getnoderpcapi":
+                    case "getnodetype":
                         JArray JA = new JArray
                         {
                             new JObject {
-                                { "nodeType",netnode },
-                                { "nodeList",new JArray{
-                                    neoCliJsonRPCUrl}
-                                }
+                                { "nodeType",netnode }
                             }
                         };
                         result = JA;
@@ -87,6 +85,12 @@ namespace NEO_Block_API.Controllers
                     case "getblockcount":
                         //resultStr = "[{blockcount:" + mh.GetDataCount(mongodbConnStr, mongodbDatabase, "block") + "}]";
                         result = getJAbyKV("blockcount", mh.GetDataCount(mongodbConnStr, mongodbDatabase, "block"));
+                        break;
+                    case "getcliblockcount":
+                        var resp = hh.Post(neoCliJsonRPCUrl, "{'jsonrpc':'2.0','method':'getblockcount','params':[],'id':1}", System.Text.Encoding.UTF8, 1);
+
+                        string cliResultStr = (string)JObject.Parse(resp)["result"];
+                        result = getJAbyKV("cliblockcount", cliResultStr);
                         break;
                     case "gettxcount":
                         //resultStr = "[{txcount:" + mh.GetDataCount(mongodbConnStr, mongodbDatabase, "tx") + "}]";
@@ -364,8 +368,8 @@ namespace NEO_Block_API.Controllers
                         result = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5asset", findFliter);
                         break;
                     case "getallnep5asset":
-                        sortStr = "{}";
-                        result = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "NEP5asset", sortStr, int.Parse(req.@params[0].ToString()), int.Parse(req.@params[1].ToString()));
+                        findFliter = "{}";
+                        result = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5asset", findFliter);
                         break;
                     case "getnep5transferbytxid":
                         string txid = ((string)req.@params[0]).formatHexStr();
