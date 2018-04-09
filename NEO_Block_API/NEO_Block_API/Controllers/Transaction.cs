@@ -273,7 +273,7 @@ namespace NEO_Block_API.Controllers
             {
                 ThinNeo.Transaction lastTran = new ThinNeo.Transaction();
                 lastTran.Deserialize(new MemoryStream(txSigned.HexString2Bytes()));
-                string txid = lastTran.GetHash().Reverse().ToArray().ToHexString();
+                string txid = lastTran.GetHash().ToString();
 
                 ////从已签名交易体分析出未签名交易体，并做Hash获得txid
                 //byte[] txUnsigned = txSigned.Split("014140")[0].HexString2Bytes();

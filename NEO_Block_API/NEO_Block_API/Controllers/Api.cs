@@ -346,7 +346,7 @@ namespace NEO_Block_API.Controllers
                     case "getnep5blanceofaddress":
                         string NEP5scripthash = (string)req.@params[0];
                         string NEP5address = (string)req.@params[1];
-                        byte[] NEP5addrHash = ThinNeo.Helper.GetPublicKeyHashFromAddress(NEP5address).Reverse().ToArray();
+                        byte[] NEP5addrHash = ThinNeo.Helper.GetPublicKeyHashFromAddress(NEP5address);
                         string NEP5addrHashHex = ThinNeo.Helper.Bytes2HexString(NEP5addrHash);
                         JObject NEP5balanceOfJ = ct.callContractForTest(neoCliJsonRPCUrl, NEP5scripthash, JArray.Parse("['(str)balanceOf',['(hex)" + NEP5addrHashHex + "']]"));
                         string balanceStr = (string)((JArray)NEP5balanceOfJ["stack"])[0]["value"];
