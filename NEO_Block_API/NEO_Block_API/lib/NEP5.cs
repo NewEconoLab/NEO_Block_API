@@ -50,6 +50,17 @@ namespace NEO_Block_API
         [BsonIgnoreExtraElements]
         public class Transfer
         {
+            public Transfer(JObject tfJ)
+            {
+                blockindex = (int)tfJ["blockindex"];
+                txid = (string)tfJ["txid"];
+                n = (int)tfJ["n"];
+                asset = (string)tfJ["asset"];
+                from = (string)tfJ["from"];
+                to = (string)tfJ["to"];
+                value = (decimal)tfJ["value"];
+            }
+
             public Transfer(int Blockindex, string Txid, int N, JObject notification, int decimals)
             {
                 blockindex = Blockindex;
@@ -76,8 +87,6 @@ namespace NEO_Block_API
                 {
                     value = -1;
                 }
-
-
             }
 
             public ObjectId _id { get; set; }

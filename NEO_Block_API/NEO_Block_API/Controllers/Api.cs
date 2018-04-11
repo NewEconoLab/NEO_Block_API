@@ -363,6 +363,56 @@ namespace NEO_Block_API.Controllers
 
                         result = getJAbyKV("nep5blance", balanceBigint);
                         break;
+                    case "getallnep5hashofaddress":
+                        string NEP5addr = (string)req.@params[0];
+                        //按资产汇集收到的钱(仅资产ID)
+                        string findTransferTo = "{ to:'" + NEP5addr + "'}";
+                        JArray transferToJA = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5transfer", findTransferTo);
+                        List<NEP5.Transfer> tfts = new List<NEP5.Transfer>();
+                        foreach (JObject tfJ in transferToJA)
+                        {
+                            tfts.Add(new NEP5.Transfer(tfJ));
+                        }
+                        var queryTo = from tft in tfts
+                                    group tft by tft.asset into tftG
+                                    select new { asset = tftG.Key};
+                        var assetAdds = queryTo.ToList();
+
+                        ////按资产汇集支出的钱
+                        //string findTransferFrom = "{ from:'" + NEP5addr + "'}";
+                        //JArray transferFromJA = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5transfer", findTransferFrom);
+                        //List<NEP5.Transfer> tffs = new List<NEP5.Transfer>();
+                        //foreach (JObject tfJ in transferFromJA)
+                        //{
+                        //    tffs.Add(new NEP5.Transfer(tfJ));
+                        //}
+                        //var queryFrom = from tff in tffs
+                        //                group tff by tff.asset into tffG
+                        //            select new { assetid = tffG.Key, sumOfValue = tffG.Sum(m => m.value) };
+                        //var assetRemoves = queryFrom.ToList();
+
+                        ////以支出的钱扣减收到的钱得到余额
+                        //JArray JAadds = JArray.FromObject(assetAdds);
+                        //foreach (JObject Jadd in JAadds) {
+                        //    foreach (var assetRemove in assetRemoves)
+                        //    {
+                        //        if ((string)Jadd["assetid"] == assetRemove.assetid)
+                        //        {
+                        //            Jadd["sumOfValue"] = (decimal)Jadd["sumOfValue"] - assetRemove.sumOfValue;
+                        //            break;
+                        //        }
+                        //    }
+                        //}
+                        //var a = Newtonsoft.Json.JsonConvert.SerializeObject(JAadds);
+
+                        //***********
+                        //经简单测试，仅看transfer记录，所有to减去所有from并不一定等于合约查询得到的地址余额(可能有其他非标方法消耗了余额，尤其是测试网)，废弃这种方法，还是采用调用NEP5合约获取地址余额方法的方式
+                        //这里给出所有该地址收到过的资产hash，可以配合其他接口获取资产信息和余额
+                        //***********
+
+                        result = JArray.FromObject(assetAdds);
+
+                        break;
                     case "getnep5asset":
                         findFliter = "{assetid:'" + ((string)req.@params[0]).formatHexStr() + "'}";
                         result = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5asset", findFliter);
