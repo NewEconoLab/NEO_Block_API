@@ -361,7 +361,7 @@ namespace NEO_Block_API.Controllers
                             balanceBigint = NEP5.getNumStrFromHexStr(balanceStr, NEP5asset.decimals);
                         }
 
-                        result = getJAbyKV("nep5blance", balanceBigint);
+                        result = getJAbyKV("nep5balance", balanceBigint);
                         break;
                     case "getallnep5assetofaddress":
                         string NEP5addr = (string)req.@params[0];
@@ -414,13 +414,13 @@ namespace NEO_Block_API.Controllers
                                 //获取NEP5资产信息，获取精度
                                 NEP5.Asset NEP5asset = new NEP5.Asset(mongodbConnStr, mongodbDatabase, abt.assetid);
 
-                                abt.value = NEP5.getNumStrFromHexStr(allBalanceStr, NEP5asset.decimals);
+                                abt.balance = NEP5.getNumStrFromHexStr(allBalanceStr, NEP5asset.decimals);
                             }
 
                             //去除余额为0的资产
                             foreach (var abt in addrAssetBalancesTemp)
                             {
-                                if (abt.value != string.Empty && abt.value != "0")
+                                if (abt.balance != string.Empty && abt.balance != "0")
                                 {
                                     addrAssetBalances.Add(abt);
                                 }

@@ -27,15 +27,15 @@ namespace NEO_Block_API
 
         public class AssetBalanceOfAddr
         {
-            public AssetBalanceOfAddr(string Assetid,string Symbol,string Value) {
+            public AssetBalanceOfAddr(string Assetid,string Symbol,string Balance) {
                 assetid = Assetid;
                 symbol = Symbol;
-                value = Value;
+                balance = Balance;
             }
 
             public string assetid { get; set; }
             public string symbol { get; set; }
-            public string value { get; set; }
+            public string balance { get; set; }
         }
 
         [BsonIgnoreExtraElements]
