@@ -363,8 +363,14 @@ namespace NEO_Block_API.Controllers
 
                         result = getJAbyKV("nep5blance", balanceBigint);
                         break;
-                    case "getallnep5hashofaddress":
+                    case "getallnep5assetofaddress":
                         string NEP5addr = (string)req.@params[0];
+                        bool isNeedBalance = false;
+                        if (req.@params.Count() > 1)
+                        {
+                            isNeedBalance = ((Int64)req.@params[1] == 1) ? true : false;
+                        }
+                        
                         //按资产汇集收到的钱(仅资产ID)
                         string findTransferTo = "{ to:'" + NEP5addr + "'}";
                         JArray transferToJA = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5transfer", findTransferTo);
@@ -375,8 +381,51 @@ namespace NEO_Block_API.Controllers
                         }
                         var queryTo = from tft in tfts
                                     group tft by tft.asset into tftG
-                                    select new { asset = tftG.Key};
+                                    select new { assetid = tftG.Key};
                         var assetAdds = queryTo.ToList();
+
+                        //如果需要余额，则通过cli RPC批量获取余额
+                        List<NEP5.AssetBalanceOfAddr> addrAssetBalances = new List<NEP5.AssetBalanceOfAddr>();
+                        if (isNeedBalance) {
+                            List<NEP5.AssetBalanceOfAddr> addrAssetBalancesTemp = new List<NEP5.AssetBalanceOfAddr>();
+                            foreach (var assetAdd in assetAdds)
+                            {
+                                string findNep5Asset = "{assetid:'" + assetAdd.assetid + "'}";
+                                JArray Nep5AssetJA = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5asset", findNep5Asset);
+                                string Symbol = (string)Nep5AssetJA[0]["symbol"];
+
+                                addrAssetBalancesTemp.Add(new NEP5.AssetBalanceOfAddr(assetAdd.assetid, Symbol, string.Empty));
+                            }
+
+                            List<string> nep5Hashs = new List<string>();
+                            JArray queryParams = new JArray();
+                            byte[] NEP5allAssetOfAddrHash = ThinNeo.Helper.GetPublicKeyHashFromAddress(NEP5addr);
+                            string NEP5allAssetOfAddrHashHex = ThinNeo.Helper.Bytes2HexString(NEP5allAssetOfAddrHash.Reverse().ToArray());
+                            foreach (var abt in addrAssetBalancesTemp)
+                            {
+                                nep5Hashs.Add(abt.assetid);
+                                queryParams.Add(JArray.Parse("['(str)balanceOf',['(hex)" + NEP5allAssetOfAddrHashHex + "']]"));                               
+                            }
+                            JArray NEP5allAssetBalanceJA = (JArray)ct.callContractForTest(neoCliJsonRPCUrl, nep5Hashs, queryParams)["stack"];
+                            var a = Newtonsoft.Json.JsonConvert.SerializeObject(NEP5allAssetBalanceJA);
+                            foreach (var abt in addrAssetBalancesTemp)
+                            {
+                                string allBalanceStr = (string)NEP5allAssetBalanceJA[addrAssetBalancesTemp.IndexOf(abt)]["value"];
+                                //获取NEP5资产信息，获取精度
+                                NEP5.Asset NEP5asset = new NEP5.Asset(mongodbConnStr, mongodbDatabase, abt.assetid);
+
+                                abt.value = NEP5.getNumStrFromHexStr(allBalanceStr, NEP5asset.decimals);
+                            }
+
+                            //去除余额为0的资产
+                            foreach (var abt in addrAssetBalancesTemp)
+                            {
+                                if (abt.value != string.Empty && abt.value != "0")
+                                {
+                                    addrAssetBalances.Add(abt);
+                                }
+                            }
+                        }
 
                         ////按资产汇集支出的钱
                         //string findTransferFrom = "{ from:'" + NEP5addr + "'}";
@@ -409,8 +458,14 @@ namespace NEO_Block_API.Controllers
                         //经简单测试，仅看transfer记录，所有to减去所有from并不一定等于合约查询得到的地址余额(可能有其他非标方法消耗了余额，尤其是测试网)，废弃这种方法，还是采用调用NEP5合约获取地址余额方法的方式
                         //这里给出所有该地址收到过的资产hash，可以配合其他接口获取资产信息和余额
                         //***********
-
-                        result = JArray.FromObject(assetAdds);
+                        if (!isNeedBalance)
+                        {
+                            result = JArray.FromObject(assetAdds);
+                        }
+                        else
+                        {
+                            result = JArray.FromObject(addrAssetBalances);
+                        }                   
 
                         break;
                     case "getnep5asset":

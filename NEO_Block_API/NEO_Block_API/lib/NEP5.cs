@@ -25,6 +25,19 @@ namespace NEO_Block_API
             { return false; }
         }
 
+        public class AssetBalanceOfAddr
+        {
+            public AssetBalanceOfAddr(string Assetid,string Symbol,string Value) {
+                assetid = Assetid;
+                symbol = Symbol;
+                value = Value;
+            }
+
+            public string assetid { get; set; }
+            public string symbol { get; set; }
+            public string value { get; set; }
+        }
+
         [BsonIgnoreExtraElements]
         public class Asset
         {
