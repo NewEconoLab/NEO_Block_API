@@ -47,21 +47,26 @@ namespace NEO_Block_API.Controllers
             return resultJ;
         }
 
-        public JObject callContractForTest(string neoCliJsonRPCUrl, string scripthash, JArray paramsJA)
+        public JObject callContractForTest(string neoCliJsonRPCUrl, List<string> scripthashs, JArray paramsJA)
         {
-            string script = (string)getContractState(neoCliJsonRPCUrl, scripthash)["script"];
-
-            var json = MyJson.Parse(JsonConvert.SerializeObject(paramsJA)).AsList();
-            
+            //string script = (string)getContractState(neoCliJsonRPCUrl, scripthash)["script"];
+            int n = 0;
             ThinNeo.ScriptBuilder sb = new ThinNeo.ScriptBuilder();
-            var list = json.AsList();
-            for (int i = list.Count - 1; i >= 0; i--)
+            foreach (var scripthash in scripthashs)
             {
-                sb.EmitParamJson(list[i]);
-            }
+                var json = MyJson.Parse(JsonConvert.SerializeObject(paramsJA[n])).AsList();
+                
+                var list = json.AsList();
+                for (int i = list.Count - 1; i >= 0; i--)
+                {
+                    sb.EmitParamJson(list[i]);
+                }
 
-            var scripthashReverse = ThinNeo.Helper.HexString2Bytes(scripthash).Reverse().ToArray();
-            sb.EmitAppCall(scripthashReverse);
+                var scripthashReverse = ThinNeo.Helper.HexString2Bytes(scripthash).Reverse().ToArray();
+                sb.EmitAppCall(scripthashReverse);
+
+                n++;
+            }
 
             string scriptPlusParams = ThinNeo.Helper.Bytes2HexString(sb.ToArray());
 

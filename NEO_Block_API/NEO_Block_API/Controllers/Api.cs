@@ -281,7 +281,7 @@ namespace NEO_Block_API.Controllers
 
                         break;
                     case "callcontractfortest":
-                        result = getJAbyJ(ct.callContractForTest(neoCliJsonRPCUrl, (string)req.@params[0], (JArray)req.@params[1]));
+                        result = getJAbyJ(ct.callContractForTest(neoCliJsonRPCUrl, new List<string> { (string)req.@params[0] }, new JArray() { (JArray)req.@params[1] }));
 
                         break;
                     case "publishcontractfortest":
@@ -348,7 +348,7 @@ namespace NEO_Block_API.Controllers
                         string NEP5address = (string)req.@params[1];
                         byte[] NEP5addrHash = ThinNeo.Helper.GetPublicKeyHashFromAddress(NEP5address);
                         string NEP5addrHashHex = ThinNeo.Helper.Bytes2HexString(NEP5addrHash.Reverse().ToArray());
-                        JObject NEP5balanceOfJ = ct.callContractForTest(neoCliJsonRPCUrl, NEP5scripthash, JArray.Parse("['(str)balanceOf',['(hex)" + NEP5addrHashHex + "']]"));
+                        JObject NEP5balanceOfJ = ct.callContractForTest(neoCliJsonRPCUrl,new List<string>{ NEP5scripthash }, new JArray() { JArray.Parse("['(str)balanceOf',['(hex)" + NEP5addrHashHex + "']]") });
                         string balanceStr = (string)((JArray)NEP5balanceOfJ["stack"])[0]["value"];
 
                         string balanceBigint = "0";
