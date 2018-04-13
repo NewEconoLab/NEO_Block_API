@@ -94,7 +94,17 @@ namespace NEO_Block_API.Controllers
                         break;
                     case "gettxcount":
                         //resultStr = "[{txcount:" + mh.GetDataCount(mongodbConnStr, mongodbDatabase, "tx") + "}]";
-                        result = getJAbyKV("txcount", mh.GetDataCount(mongodbConnStr, mongodbDatabase, "tx"));
+                        //result = getJAbyKV("txcount", mh.GetDataCount(mongodbConnStr, mongodbDatabase, "tx"));
+                        findFliter = "{}";
+                        if (req.@params.Count() > 0)
+                        {
+                            string type = req.@params[0].ToString();
+                            if (type != null && type != string.Empty)
+                            {
+                                findFliter = "{type:\"" + type + "\"}";
+                            }
+                        }
+                        result = getJAbyKV("cliblockcount", mh.GetDataCount(mongodbConnStr, mongodbDatabase, "tx", findFliter));
                         break;
                     case "getaddrcount":
                         //resultStr = "[{addrcount:" + mh.GetDataCount(mongodbConnStr, mongodbDatabase, "address") + "}]";
