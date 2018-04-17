@@ -509,6 +509,11 @@ namespace NEO_Block_API.Controllers
                         sortStr = "{'blockindex':1,'txid':1,'n':1}";
                         result = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "NEP5transfer", sortStr, int.Parse(req.@params[0].ToString()), int.Parse(req.@params[1].ToString()));
                         break;
+                    case "getnep5transfersbyasset":
+                        string str_asset = ((string)req.@params[0]).formatHexStr();
+                        findFliter = "{asset:'" + str_asset + "'}";
+                        result = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5transfer", findFliter);
+                        break;
                 }
                 if (result.Count == 0)
                 {
