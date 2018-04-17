@@ -104,7 +104,7 @@ namespace NEO_Block_API.Controllers
                                 findFliter = "{type:\"" + type + "\"}";
                             }
                         }
-                        result = getJAbyKV("cliblockcount", mh.GetDataCount(mongodbConnStr, mongodbDatabase, "tx", findFliter));
+                        result = getJAbyKV("txcount", mh.GetDataCount(mongodbConnStr, mongodbDatabase, "tx", findFliter));
                         break;
                     case "getaddrcount":
                         //resultStr = "[{addrcount:" + mh.GetDataCount(mongodbConnStr, mongodbDatabase, "address") + "}]";
