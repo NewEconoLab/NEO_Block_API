@@ -360,6 +360,7 @@ namespace NEO_Block_API.Controllers
                         string NEP5addrHashHex = ThinNeo.Helper.Bytes2HexString(NEP5addrHash.Reverse().ToArray());
                         JObject NEP5balanceOfJ = ct.callContractForTest(neoCliJsonRPCUrl,new List<string>{ NEP5scripthash }, new JArray() { JArray.Parse("['(str)balanceOf',['(hex)" + NEP5addrHashHex + "']]") });
                         string balanceStr = (string)((JArray)NEP5balanceOfJ["stack"])[0]["value"];
+                        string balanceType = (string)((JArray)NEP5balanceOfJ["stack"])[0]["type"];
 
                         string balanceBigint = "0";
 
@@ -368,7 +369,7 @@ namespace NEO_Block_API.Controllers
                             //获取NEP5资产信息，获取精度
                             NEP5.Asset NEP5asset = new NEP5.Asset(mongodbConnStr, mongodbDatabase, NEP5scripthash);
 
-                            balanceBigint = NEP5.getNumStrFromHexStr(balanceStr, NEP5asset.decimals);
+                            balanceBigint = NEP5.getNumStrFromStr(balanceType,balanceStr, NEP5asset.decimals);
                         }
 
                         result = getJAbyKV("nep5balance", balanceBigint);
@@ -421,10 +422,11 @@ namespace NEO_Block_API.Controllers
                             foreach (var abt in addrAssetBalancesTemp)
                             {
                                 string allBalanceStr = (string)NEP5allAssetBalanceJA[addrAssetBalancesTemp.IndexOf(abt)]["value"];
+                                string allBalanceType = (string)NEP5allAssetBalanceJA[addrAssetBalancesTemp.IndexOf(abt)]["type"];
                                 //获取NEP5资产信息，获取精度
                                 NEP5.Asset NEP5asset = new NEP5.Asset(mongodbConnStr, mongodbDatabase, abt.assetid);
 
-                                abt.balance = NEP5.getNumStrFromHexStr(allBalanceStr, NEP5asset.decimals);
+                                abt.balance = NEP5.getNumStrFromStr(allBalanceType,allBalanceStr, NEP5asset.decimals);
                             }
 
                             //去除余额为0的资产
