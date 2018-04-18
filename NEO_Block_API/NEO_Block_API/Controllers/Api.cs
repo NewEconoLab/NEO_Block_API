@@ -516,7 +516,7 @@ namespace NEO_Block_API.Controllers
                         break;
                     case "getnep5transferbyblockindex":
                         Int64 blockindex = (Int64)req.@params[0];
-                        findFliter = "{blockindex:'" + blockindex + "'}";
+                        findFliter = "{blockindex:" + blockindex + "}";
                         result = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5transfer", findFliter);
                         break;
                 }
