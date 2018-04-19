@@ -535,6 +535,11 @@ namespace NEO_Block_API.Controllers
                         findFliter = "{blockindex:" + blockindex + "}";
                         result = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5transfer", findFliter);
                         break;
+                    case "getaddresstxbyblockindex":
+                        blockindex = (Int64)req.@params[0];
+                        findFliter = "{blockindex:" + blockindex + "}";
+                        result = mh.GetData(mongodbConnStr, mongodbDatabase, "address_tx", findFliter);
+                        break;
                 }
                 if (result.Count == 0)
                 {
