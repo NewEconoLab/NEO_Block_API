@@ -168,15 +168,31 @@ namespace NEO_Block_API.Controllers
                         if (req.@params.Count() == 1)
                         {
                             findFliter = "{addr:'" + req.@params[0] + "',used:''}";
-                        };
-                        if (req.@params.Count() == 2)
+                            result = mh.GetData(mongodbConnStr, mongodbDatabase, "utxo", findFliter);
+                        }
+                        else if (req.@params.Count() == 2)
                         {
                             if ((Int64)req.@params[1] == 1)
                             {
                                 findFliter = "{addr:'" + req.@params[0] + "'}";
                             }
+                            result = mh.GetData(mongodbConnStr, mongodbDatabase, "utxo", findFliter);
                         }
-                        result = mh.GetData(mongodbConnStr, mongodbDatabase, "utxo", findFliter);
+                        else if (req.@params.Count() == 3)
+                        {
+                            findFliter = "{addr:'" + req.@params[0] + "',used:''}";
+                            sortStr = "{'createHeight':1,'txid':1,'n':1}";
+                            result = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "utxo", sortStr, int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()), findFliter);
+                        }
+                        else if (req.@params.Count() == 4)
+                        {
+                            if ((Int64)req.@params[1] == 1)
+                            {
+                                findFliter = "{addr:'" + req.@params[0] + "'}";
+                            }
+                            sortStr = "{'createHeight':1,'txid':1,'n':1}";
+                            result = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "utxo", sortStr, int.Parse(req.@params[2].ToString()), int.Parse(req.@params[3].ToString()), findFliter);
+                        }
                         break;
                     case "getutxostopay":
                         string address = (string)req.@params[0];
