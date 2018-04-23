@@ -194,6 +194,14 @@ namespace NEO_Block_API.Controllers
                             result = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "utxo", sortStr, int.Parse(req.@params[2].ToString()), int.Parse(req.@params[3].ToString()), findFliter);
                         }
                         break;
+                    case "getutxocount":
+                        addr = req.@params[0].ToString();
+                        if (addr != null && addr != string.Empty)
+                        {
+                            findFliter = "{addr:\"" + addr + "\"}";
+                        }
+                        result = getJAbyKV("utxocount", mh.GetDataCount(mongodbConnStr, mongodbDatabase, "utxo", findFliter));
+                        break;
                     case "getutxostopay":
                         string address = (string)req.@params[0];
                         string assetID = ((string)req.@params[1]).formatHexStr();
