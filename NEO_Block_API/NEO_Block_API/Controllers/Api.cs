@@ -114,6 +114,11 @@ namespace NEO_Block_API.Controllers
                         findFliter = "{index:" + req.@params[0] + "}";
                         result = mh.GetData(mongodbConnStr, mongodbDatabase, "block", findFliter);
                         break;
+                    case "getblocktime":
+                        findFliter = "{index:" + req.@params[0] + "}";
+                        var time = (Int32)mh.GetData(mongodbConnStr, mongodbDatabase, "block", findFliter)[0]["time"];
+                        result = getJAbyKV("time", time);
+                        break;
                     case "getblocks":
                         sortStr = "{index:-1}";
                         result = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "block", sortStr, int.Parse(req.@params[0].ToString()), int.Parse(req.@params[1].ToString()));
@@ -536,7 +541,21 @@ namespace NEO_Block_API.Controllers
                     case "getnep5transfersbyasset":
                         string str_asset = ((string)req.@params[0]).formatHexStr();
                         findFliter = "{asset:'" + str_asset + "'}";
-                        result = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5transfer", findFliter);
+                        sortStr = "{'blockindex':1,'txid':1,'n':1}";
+                        if(req.@params.Count() ==3)
+                            result = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "NEP5transfer", sortStr, int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()), findFliter);
+                        else
+                            result = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5transfer",findFliter);
+                        break;
+                    case "getnep5count":
+                        findFliter = "{}";
+                        if (req.@params.Count() == 2)
+                        {
+                            string key = (string)req.@params[0];
+                            string value = (string)req.@params[1];
+                            findFliter = "{\"" + key + "\":\"" + value + "\"}";
+                        }
+                        result = getJAbyKV("nep5count", mh.GetDataCount(mongodbConnStr, mongodbDatabase, "NEP5transfer", findFliter));
                         break;
                     case "getnep5transferbyblockindex":
                         Int64 blockindex = (Int64)req.@params[0];
