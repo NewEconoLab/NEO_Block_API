@@ -567,6 +567,96 @@ namespace NEO_Block_API.Controllers
                         findFliter = "{blockindex:" + blockindex + "}";
                         result = mh.GetData(mongodbConnStr, mongodbDatabase, "address_tx", findFliter);
                         break;
+                    case "gettxinfo":
+                        txid = ((string)req.@params[0]).formatHexStr();
+                        findFliter = "{txid:'" + (txid).formatHexStr() + "'}";
+                        JArray JATx = mh.GetData(mongodbConnStr, mongodbDatabase, "tx", findFliter);
+                        JObject JOTx = (JObject)JATx[0];
+                        var heightforblock = (int)JOTx["blockindex"];
+                        var indexforblock = -1;
+                        findFliter = "{index:" + heightforblock + "}";
+                        result = (JArray)mh.GetData(mongodbConnStr, mongodbDatabase, "block", findFliter)[0]["tx"];
+                        for (var i = 0; i < result.Count; i++)
+                        {
+                            JObject Jo = (JObject)result[i];
+                            if (txid == (string)Jo["txid"])
+                            {
+                                indexforblock = i;
+                            }
+                        }
+                        JObject JOresult = new JObject();
+                        JOresult["heightforblock"] = heightforblock;
+                        JOresult["indexforblock"] = indexforblock;
+                        result = new JArray() { JOresult };
+                        break;
+                    case "uxtoinfo":
+                        var starttxid = ((string)req.@params[0]).formatHexStr();
+                        var voutN = (Int64)req.@params[1];
+
+                        findFliter = "{txid:'" + (starttxid).formatHexStr() + "'}";
+                        JATx = mh.GetData(mongodbConnStr, mongodbDatabase, "tx", findFliter);
+                        JOTx = (JObject)JATx[0];
+                        int starttxblockheight = (int)JOTx["blockindex"];
+                        int starttxblockindex = -1;
+                        findFliter = "{index:" + starttxblockheight + "}";
+                        result = (JArray)mh.GetData(mongodbConnStr, mongodbDatabase, "block", findFliter)[0]["tx"];
+                        for (var i = 0; i < result.Count; i++)
+                        {
+                            JObject Jo = (JObject)result[i];
+                            if (starttxid == (string)Jo["txid"])
+                            {
+                                starttxblockindex = i;
+                            }
+                        }
+                        //根据txid和n获取utxo信息
+                        findFliter = "{txid:\"" + starttxid + "\",n:"+ voutN + "}";
+                        var endtxid = (string)mh.GetData(mongodbConnStr, mongodbDatabase, "utxo", findFliter)[0]["used"];
+                        int endtxblockheight = -1;
+                        int endtxblockindex = -1;
+                        int vinputN = -1;
+                        if (!string.IsNullOrEmpty(endtxid))
+                        {
+                            findFliter = "{txid:'" + (endtxid).formatHexStr() + "'}";
+                            JATx = mh.GetData(mongodbConnStr, mongodbDatabase, "tx", findFliter);
+                            JOTx = (JObject)JATx[0];
+                            endtxblockheight = (int)JOTx["blockindex"];
+                            JArray JAvin = (JArray)JOTx["vin"];
+                            findFliter = "{index:" + endtxblockheight + "}";
+                            result = (JArray)mh.GetData(mongodbConnStr, mongodbDatabase, "block", findFliter)[0]["tx"];
+                            for (var i = 0; i < result.Count; i++)
+                            {
+                                JObject Jo = (JObject)result[i];
+                                if (endtxid == (string)Jo["txid"])
+                                {
+                                    endtxblockindex = i;
+                                }
+                            }
+                            for (var i = 0; i < JAvin.Count; i++)
+                            {
+                                JObject Jo = (JObject)JAvin[i];
+                                if ((string)Jo["txid"] == starttxid && voutN == i)
+                                {
+                                    vinputN = i;
+                                }
+                            }
+
+                        }
+                        else
+                        {
+                        }
+
+                        JOresult = new JObject();
+                        JOresult["starttxid"] = starttxid;
+                        JOresult["starttxblockheight"] = starttxblockheight;
+                        JOresult["starttxblockindex"] = starttxblockindex;
+                        JOresult["voutN"] = voutN;
+                        JOresult["endtxid"] = endtxid;
+                        JOresult["endtxblockheight"] = endtxblockheight;
+                        JOresult["endtxblockindex"] = endtxblockindex;
+                        JOresult["vinputN"] = vinputN;
+                        result = new JArray() { JOresult };
+
+                        break;
                 }
                 if (result.Count == 0)
                 {
