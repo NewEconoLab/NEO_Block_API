@@ -168,9 +168,14 @@ namespace NEO_Block_API.lib
         //流模式post
         public string Post(string url, string data, Encoding encoding, int type = 3)
         {
+            HttpWebRequest req = null;
+            HttpWebResponse rsp = null;
+            Stream reqStream = null;
+            //Stream resStream = null;
+
             try
             {
-                HttpWebRequest req = WebRequest.CreateHttp(new Uri(url));
+                req = WebRequest.CreateHttp(new Uri(url));
                 if (type == 1)
                 {
                     req.ContentType = "application/json;charset=utf-8";
@@ -189,18 +194,38 @@ namespace NEO_Block_API.lib
                 req.ContinueTimeout = 60000;
 
                 byte[] postData = encoding.GetBytes(data);
-                Stream reqStream = req.GetRequestStreamAsync().Result;
+                reqStream = req.GetRequestStreamAsync().Result;
                 reqStream.Write(postData, 0, postData.Length);
-                reqStream.Dispose();
+                //reqStream.Dispose();
 
-                var rsp = (HttpWebResponse)req.GetResponseAsync().Result;
-                var result = GetResponseAsString(rsp, encoding);
+                rsp = (HttpWebResponse)req.GetResponseAsync().Result;
+                string result = GetResponseAsString(rsp, encoding);              
 
                 return result;
             }
             catch (Exception ex)
             {
                 throw;
+            }
+            finally
+            {
+                // 释放资源
+                if (reqStream != null)
+                {
+                    reqStream.Close();
+                    reqStream = null;
+                }
+                if (rsp != null)
+                {
+                    rsp.Close();
+                    rsp = null;
+                }
+                if (req != null)
+                {
+                    req.Abort();
+
+                    req = null;
+                }
             }
         }
 
@@ -214,14 +239,20 @@ namespace NEO_Block_API.lib
                 // 以字符流的方式读取HTTP响应
                 stream = rsp.GetResponseStream();
                 reader = new StreamReader(stream, encoding);
+
                 return reader.ReadToEnd();
             }
             finally
             {
                 // 释放资源
-                if (reader != null) reader.Dispose();
-                if (stream != null) stream.Dispose();
-                if (rsp != null) rsp.Dispose();
+                if (reader != null)
+                    reader.Close();
+                if (stream != null)
+                    stream.Close();
+
+                reader = null;
+                stream = null;
+
             }
         }
     }
