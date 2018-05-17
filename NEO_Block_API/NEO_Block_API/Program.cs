@@ -23,7 +23,7 @@ namespace NEO_Block_API
                 .UseStartup<Startup>()
                 .UseKestrel(options =>
                 {
-                    options.Listen(IPAddress.Any, 80);
+                    options.Listen(IPAddress.Any, 82);
                     //options.Listen(IPAddress.Loopback, 5001, listenOptions =>
                     //{
                     //    listenOptions.UseHttps("testCert.pfx", "testPassword");
