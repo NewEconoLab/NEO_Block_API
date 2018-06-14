@@ -389,6 +389,10 @@ namespace NEO_Block_API.Controllers
                         break;
                     case "getnep5balanceofaddress":
                         string NEP5scripthash = (string)req.@params[0];
+                        if(!NEP5scripthash.StartsWith("0x"))
+                        {
+                            NEP5scripthash = "0x" + NEP5scripthash;
+                        }
                         string NEP5address = (string)req.@params[1];
                         byte[] NEP5addrHash = ThinNeo.Helper.GetPublicKeyHashFromAddress(NEP5address);
                         string NEP5addrHashHex = ThinNeo.Helper.Bytes2HexString(NEP5addrHash.Reverse().ToArray());
