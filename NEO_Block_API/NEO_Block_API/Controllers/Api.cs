@@ -532,21 +532,24 @@ namespace NEO_Block_API.Controllers
                         result = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5transfer", findFliter);
                         break;
                     case "getnep5transferbyaddress":
-                        sortStr = "{'blockindex':1,'txid':1,'n':1}";
+                        //sortStr = "{'blockindex':1,'txid':1,'n':1}";
+                        sortStr = "{}";
                         string NEP5transferAddress = (string)req.@params[0];
                         string NEP5transferAddressType = (string)req.@params[1];
                         findFliter = "{'" + NEP5transferAddressType + "':'" + NEP5transferAddress + "'}";
                         result = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "NEP5transfer", sortStr, int.Parse(req.@params[2].ToString()), int.Parse(req.@params[3].ToString()),findFliter);
                         break;
                     case "getnep5transfers":
-                        sortStr = "{'blockindex':1,'txid':1,'n':1}";
+                        //sortStr = "{'blockindex':1,'txid':1,'n':1}";
+                        sortStr = "{}";
                         result = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "NEP5transfer", sortStr, int.Parse(req.@params[0].ToString()), int.Parse(req.@params[1].ToString()));
                         break;
                     case "getnep5transfersbyasset":
                         string str_asset = ((string)req.@params[0]).formatHexStr();
                         findFliter = "{asset:'" + str_asset + "'}";
-                        sortStr = "{'blockindex':1,'txid':1,'n':1}";
-                        if(req.@params.Count() ==3)
+                        //sortStr = "{'blockindex':1,'txid':1,'n':1}";
+                        sortStr = "{}";
+                        if (req.@params.Count() ==3)
                             result = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "NEP5transfer", sortStr, int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()), findFliter);
                         else
                             result = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5transfer",findFliter);
