@@ -69,6 +69,8 @@ namespace NEO_Block_API.Controllers
             }
 
             string scriptPlusParams = ThinNeo.Helper.Bytes2HexString(sb.ToArray());
+            Console.WriteLine("sb:" + scriptPlusParams);
+
 
             return invokeScript(neoCliJsonRPCUrl, scriptPlusParams);
         }
