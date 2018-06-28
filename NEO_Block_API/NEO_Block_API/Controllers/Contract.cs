@@ -54,6 +54,15 @@ namespace NEO_Block_API.Controllers
             ThinNeo.ScriptBuilder sb = new ThinNeo.ScriptBuilder();
             foreach (var scripthash in scripthashs)
             {
+
+                httpHelper hh = new httpHelper();
+                var resp = hh.Post(neoCliJsonRPCUrl, "{'jsonrpc':'2.0','method':'getcontractstate','params':['" + scripthash + "'],'id':1}", System.Text.Encoding.UTF8, 1);
+
+                JObject resultJ = (JObject)JObject.Parse(resp)["result"];
+                Console.WriteLine("TTT.scripthash:" + scripthash + "resultJ:" + resultJ);
+                if (resultJ == null)
+                    continue;
+
                 var json = MyJson.Parse(JsonConvert.SerializeObject(paramsJA[n])).AsList();
                 
                 var list = json.AsList();
