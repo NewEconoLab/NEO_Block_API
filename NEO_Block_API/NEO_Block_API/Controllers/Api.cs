@@ -459,12 +459,21 @@ namespace NEO_Block_API.Controllers
                             var a = Newtonsoft.Json.JsonConvert.SerializeObject(NEP5allAssetBalanceJA);
                             foreach (var abt in addrAssetBalancesTemp)
                             {
-                                string allBalanceStr = (string)NEP5allAssetBalanceJA[addrAssetBalancesTemp.IndexOf(abt)]["value"];
-                                string allBalanceType = (string)NEP5allAssetBalanceJA[addrAssetBalancesTemp.IndexOf(abt)]["type"];
-                                //获取NEP5资产信息，获取精度
-                                NEP5.Asset NEP5asset = new NEP5.Asset(mongodbConnStr, mongodbDatabase, abt.assetid);
+                                /// ChangeLog:
+                                /// 升级智能合约带来的数据结构不一致问题，暂时使用try方式临时解决
+                                try
+                                {
+                                    string allBalanceStr = (string)NEP5allAssetBalanceJA[addrAssetBalancesTemp.IndexOf(abt)]["value"];
+                                    string allBalanceType = (string)NEP5allAssetBalanceJA[addrAssetBalancesTemp.IndexOf(abt)]["type"];
+                                    //获取NEP5资产信息，获取精度
+                                    NEP5.Asset NEP5asset = new NEP5.Asset(mongodbConnStr, mongodbDatabase, abt.assetid);
 
-                                abt.balance = NEP5.getNumStrFromStr(allBalanceType,allBalanceStr, NEP5asset.decimals);
+                                    abt.balance = NEP5.getNumStrFromStr(allBalanceType, allBalanceStr, NEP5asset.decimals);
+                                } catch (Exception e)
+                                {
+                                    Console.WriteLine(abt.assetid +",ConvertTypeFailed,errMsg:"+e.Message);
+                                    abt.balance = string.Empty;
+                                }
                             }
 
                             //去除余额为0的资产
