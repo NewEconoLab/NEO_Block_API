@@ -465,6 +465,9 @@ namespace NEO_Block_API.Controllers
                                 {
                                     string allBalanceStr = (string)NEP5allAssetBalanceJA[addrAssetBalancesTemp.IndexOf(abt)]["value"];
                                     string allBalanceType = (string)NEP5allAssetBalanceJA[addrAssetBalancesTemp.IndexOf(abt)]["type"];
+                                    Console.WriteLine("allBalanceStr:"+allBalanceStr);
+                                    Console.WriteLine("allBalanceType:"+allBalanceType);
+                                    
                                     //获取NEP5资产信息，获取精度
                                     NEP5.Asset NEP5asset = new NEP5.Asset(mongodbConnStr, mongodbDatabase, abt.assetid);
 
