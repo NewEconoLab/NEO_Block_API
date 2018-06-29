@@ -47,19 +47,20 @@ namespace NEO_Block_API.Controllers
             return resultJ;
         }
 
-        public JObject callContractForTest(string neoCliJsonRPCUrl, List<string> scripthashs, JArray paramsJA)
+        public JArray callContractForTest(string neoCliJsonRPCUrl, List<string> scripthashs, JArray paramsJA)
         {
             //string script = (string)getContractState(neoCliJsonRPCUrl, scripthash)["script"];
             int n = 0;
             ThinNeo.ScriptBuilder sb = new ThinNeo.ScriptBuilder();
+            JArray ja = new JArray();
             foreach (var scripthash in scripthashs)
             {
 
                 httpHelper hh = new httpHelper();
-                var resp = hh.Post(neoCliJsonRPCUrl, "{'jsonrpc':'2.0','method':'getcontractstate','params':['" + scripthash + "'],'id':1}", System.Text.Encoding.UTF8, 1);
-                JObject resultJ = (JObject)JObject.Parse(resp)["result"];
-                if (resultJ == null)
-                    continue;
+                //var resp = hh.Post(neoCliJsonRPCUrl, "{'jsonrpc':'2.0','method':'getcontractstate','params':['" + scripthash + "'],'id':1}", System.Text.Encoding.UTF8, 1);
+                //JObject resultJ = (JObject)JObject.Parse(resp)["result"];
+                //if (resultJ == null)
+                //    continue;
 
                 var json = MyJson.Parse(JsonConvert.SerializeObject(paramsJA[n])).AsList();
                 
@@ -72,13 +73,13 @@ namespace NEO_Block_API.Controllers
                 var scripthashReverse = ThinNeo.Helper.HexString2Bytes(scripthash).Reverse().ToArray();
                 sb.EmitAppCall(scripthashReverse);
 
+                string scriptPlusParams = ThinNeo.Helper.Bytes2HexString(sb.ToArray());
+                
+                ja.Merge(invokeScript(neoCliJsonRPCUrl, scriptPlusParams)["stack"]);
                 n++;
             }
-
-            string scriptPlusParams = ThinNeo.Helper.Bytes2HexString(sb.ToArray());
-
-
-            return invokeScript(neoCliJsonRPCUrl, scriptPlusParams);
+            Console.WriteLine("jo:"+ja);
+            return ja;
         }
 
         public JObject publishContractForTest(string neoCliJsonRPCUrl, string avmHexstring, JObject infoJ)
