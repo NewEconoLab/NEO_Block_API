@@ -47,47 +47,33 @@ namespace NEO_Block_API.Controllers
             return resultJ;
         }
 
-        public JArray callContractForTest(string neoCliJsonRPCUrl, List<string> scripthashs, JArray paramsJA)
+        public JObject callContractForTest(string neoCliJsonRPCUrl, List<string> scripthashs, JArray paramsJA)
         {
             //string script = (string)getContractState(neoCliJsonRPCUrl, scripthash)["script"];
             int n = 0;
             ThinNeo.ScriptBuilder sb = new ThinNeo.ScriptBuilder();
-            JArray ja = new JArray();
-            try
+
+            foreach (var scripthash in scripthashs)
             {
-                foreach (var scripthash in scripthashs)
+
+                httpHelper hh = new httpHelper();
+
+                var json = MyJson.Parse(JsonConvert.SerializeObject(paramsJA[n])).AsList();
+
+                var list = json.AsList();
+                for (int i = list.Count - 1; i >= 0; i--)
                 {
-
-                    httpHelper hh = new httpHelper();
-                    //var resp = hh.Post(neoCliJsonRPCUrl, "{'jsonrpc':'2.0','method':'getcontractstate','params':['" + scripthash + "'],'id':1}", System.Text.Encoding.UTF8, 1);
-                    //JObject resultJ = (JObject)JObject.Parse(resp)["result"];
-                    //if (resultJ == null)
-                    //    continue;
-
-                    var json = MyJson.Parse(JsonConvert.SerializeObject(paramsJA[n])).AsList();
-
-                    var list = json.AsList();
-                    for (int i = list.Count - 1; i >= 0; i--)
-                    {
-                        sb.EmitParamJson(list[i]);
-                    }
-
-                    var scripthashReverse = ThinNeo.Helper.HexString2Bytes(scripthash).Reverse().ToArray();
-                    sb.EmitAppCall(scripthashReverse);
-
-                    string scriptPlusParams = ThinNeo.Helper.Bytes2HexString(sb.ToArray());
-
-                    ja.Merge(invokeScript(neoCliJsonRPCUrl, scriptPlusParams)["stack"]);
-                    n++;
+                    sb.EmitParamJson(list[i]);
                 }
-                Console.WriteLine("jo:" + ja);
-                return ja;
-            }
-            catch(Exception e)
-            {
-                Console.WriteLine("TerrMsg:"+e);
+
+                var scripthashReverse = ThinNeo.Helper.HexString2Bytes(scripthash).Reverse().ToArray();
+                sb.EmitAppCall(scripthashReverse);
+
+                n++;
             }
 
+            string scriptPlusParams = ThinNeo.Helper.Bytes2HexString(sb.ToArray());
+            return invokeScript(neoCliJsonRPCUrl, scriptPlusParams);
         }
 
         public JObject publishContractForTest(string neoCliJsonRPCUrl, string avmHexstring, JObject infoJ)

@@ -442,6 +442,10 @@ namespace NEO_Block_API.Controllers
                                 string findNep5Asset = "{assetid:'" + assetAdd.assetid + "'}";
                                 JArray Nep5AssetJA = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5asset", findNep5Asset);
                                 string Symbol = (string)Nep5AssetJA[0]["symbol"];
+                                resp = hh.Post(neoCliJsonRPCUrl, "{'jsonrpc':'2.0','method':'getcontractstate','params':['" + assetAdd.assetid + "'],'id':1}", System.Text.Encoding.UTF8, 1);
+                                JObject resultJ = (JObject)JObject.Parse(resp)["result"];
+                                if (resultJ == null)
+                                    continue;
 
                                 addrAssetBalancesTemp.Add(new NEP5.AssetBalanceOfAddr(assetAdd.assetid, Symbol, string.Empty));
                             }
@@ -455,7 +459,7 @@ namespace NEO_Block_API.Controllers
                                 nep5Hashs.Add(abt.assetid);
                                 queryParams.Add(JArray.Parse("['(str)balanceOf',['(hex)" + NEP5allAssetOfAddrHashHex + "']]"));                               
                             }
-                            JArray NEP5allAssetBalanceJA = (JArray)ct.callContractForTest(neoCliJsonRPCUrl, nep5Hashs, queryParams);
+                            JArray NEP5allAssetBalanceJA = (JArray)ct.callContractForTest(neoCliJsonRPCUrl, nep5Hashs, queryParams)["stack"];
                             var a = Newtonsoft.Json.JsonConvert.SerializeObject(NEP5allAssetBalanceJA);
                             foreach (var abt in addrAssetBalancesTemp)
                             {
