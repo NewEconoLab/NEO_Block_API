@@ -47,9 +47,11 @@ namespace NEO_Block_API.Controllers
             return resultJ;
         }
 
+        
         public JObject callContractForTest(string neoCliJsonRPCUrl, List<string> scripthashs, JArray paramsJA)
         {
             //string script = (string)getContractState(neoCliJsonRPCUrl, scripthash)["script"];
+            /*
             int n = 0;
             ThinNeo.ScriptBuilder sb = new ThinNeo.ScriptBuilder();
 
@@ -74,6 +76,77 @@ namespace NEO_Block_API.Controllers
 
             string scriptPlusParams = ThinNeo.Helper.Bytes2HexString(sb.ToArray());
             return invokeScript(neoCliJsonRPCUrl, scriptPlusParams);
+            */
+
+
+            /// ChangeLog:
+            /// 批量调用invokeScript时，个别出错会导致，出错之后结果数据丢失。所以修改为单个单个查询，
+            /// 为保证外层解析数据的顺序性，需将出错的结果位置填充数值
+            ///
+            JObject res = new JObject();
+            JArray stackList = new JArray();
+            int n = 0;
+            foreach (var scripthash in scripthashs)
+            {
+                ThinNeo.ScriptBuilder tmpSb = new ThinNeo.ScriptBuilder();
+                httpHelper hh = new httpHelper();
+                var json = MyJson.Parse(JsonConvert.SerializeObject(paramsJA[n])).AsList();
+                var list = json.AsList();
+                for (int i = list.Count - 1; i >= 0; i--)
+                {
+                    tmpSb.EmitParamJson(list[i]);
+                }
+
+                var scripthashReverse = ThinNeo.Helper.HexString2Bytes(scripthash).Reverse().ToArray();
+                tmpSb.EmitAppCall(scripthashReverse);
+                string invokeSc = ThinNeo.Helper.Bytes2HexString(tmpSb.ToArray());
+                JObject invokeRs = invokeScript(neoCliJsonRPCUrl, invokeSc);
+
+                string state = invokeRs["state"].ToString();
+                JArray stack = (JArray)invokeRs["stack"];
+                JObject stack1 = null;
+                if (state.StartsWith("FAULT"))
+                {
+                    // 调用合约出错，填充占位
+                    stack1 = new JObject();
+                    stack1.Add("type", "FAULT");
+                    stack1.Add("value", "");
+                }
+                else
+                {
+                    stack1 = (JObject)stack[0];
+                }
+                stackList.Add(stack1);
+            }
+            res.Add("stack", stackList);
+
+            // debug info
+            /*
+            n = 0;
+            List<JObject> rlist = new List<JObject>();  
+            foreach (var scripthash in scripthashs)
+            {
+                ThinNeo.ScriptBuilder tmpSb = new ThinNeo.ScriptBuilder();
+                httpHelper hh = new httpHelper();
+                var json = MyJson.Parse(JsonConvert.SerializeObject(paramsJA[n])).AsList();
+                var list = json.AsList();
+                for (int i = list.Count - 1; i >= 0; i--)
+                {
+                    tmpSb.EmitParamJson(list[i]);
+                }
+                var scripthashReverse = ThinNeo.Helper.HexString2Bytes(scripthash).Reverse().ToArray();
+                tmpSb.EmitAppCall(scripthashReverse);
+                string invokeSc = ThinNeo.Helper.Bytes2HexString(tmpSb.ToArray());
+                JObject invokeRs = invokeScript(neoCliJsonRPCUrl, invokeSc);
+                JObject obj = new JObject();
+                obj.Add("sc", scripthash);
+                obj.Add("ic", invokeSc);
+                obj.Add("rs", invokeRs);
+                rlist.Add(obj);
+            }
+            */
+            return res;
+
         }
 
         public JObject publishContractForTest(string neoCliJsonRPCUrl, string avmHexstring, JObject infoJ)
