@@ -8,6 +8,7 @@ using Newtonsoft.Json.Linq;
 using NEO_Block_API.RPC;
 using NEO_Block_API.lib;
 using System.IO;
+using log4net;
 
 namespace NEO_Block_API.Controllers
 {
@@ -16,6 +17,7 @@ namespace NEO_Block_API.Controllers
     public class TestnetController : Controller
     {
         Api api = new Api("testnet");
+        private ILog log = LogManager.GetLogger(Startup.repository.Name, typeof(TestnetController));
 
         [HttpGet]
         public JsonResult Get(string @jsonrpc, string @method, string @params, long @id)
@@ -75,12 +77,15 @@ namespace NEO_Block_API.Controllers
                 }
 
                 string ipAddr = Request.HttpContext.Connection.RemoteIpAddress.ToString();
+
+                log.Info(Json(api.getRes(req, ipAddr)).ToString());
                 return Json(api.getRes(req, ipAddr));
             }
             catch (Exception e)
             {
                 JsonPRCresponse_Error resE = new JsonPRCresponse_Error(0, -100, "Parameter Error", e.Message);
 
+                log.Error(Json(resE).ToString());
                 return Json(resE);
 
             }
