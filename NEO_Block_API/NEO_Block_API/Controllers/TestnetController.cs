@@ -22,10 +22,12 @@ namespace NEO_Block_API.Controllers
         [HttpGet]
         public JsonResult Get(string @jsonrpc, string @method, string @params, long @id)
         {
+            JsonRPCrequest req = null;
+            DateTime start = DateTime.Now;
 
             try
             {
-                JsonRPCrequest req = new JsonRPCrequest
+                req = new JsonRPCrequest
                 {
                     jsonrpc = @jsonrpc,
                     method = @method,
@@ -34,25 +36,32 @@ namespace NEO_Block_API.Controllers
                 };
 
                 string ipAddr = Request.HttpContext.Connection.RemoteIpAddress.ToString();
-                return Json(api.getRes(req,ipAddr));
+
+                var result = Json(api.getRes(req, ipAddr));
+                log.Info(logHelper.logInfoFormat(req, result, start));
+                return result;
             }
             catch (Exception e)
             {
                 JsonPRCresponse_Error resE = new JsonPRCresponse_Error(0, -100, "Parameter Error", e.Message);
 
-                return Json(resE);
-
+                var result = Json(resE);
+                log.Error(logHelper.logInfoFormat(req, result, start));
+                return Json(result);
             }
         }
 
         [HttpPost]
         public async Task<JsonResult> Post()
         {
+            JsonRPCrequest req = null;
+            DateTime start = DateTime.Now;
+
             try
             {
                 var ctype = HttpContext.Request.ContentType;
                 LitServer.FormData form = null;
-                JsonRPCrequest req = null;
+                
                 if (ctype == "application/x-www-form-urlencoded" ||
                      (ctype.IndexOf("multipart/form-data;") == 0))
                 {
@@ -78,16 +87,17 @@ namespace NEO_Block_API.Controllers
 
                 string ipAddr = Request.HttpContext.Connection.RemoteIpAddress.ToString();
 
-                log.Info(Json(api.getRes(req, ipAddr)).ToString());
-                return Json(api.getRes(req, ipAddr));
+                var result = Json(api.getRes(req, ipAddr));
+                log.Info(logHelper.logInfoFormat(req,result,start));
+                return result;
             }
             catch (Exception e)
             {
                 JsonPRCresponse_Error resE = new JsonPRCresponse_Error(0, -100, "Parameter Error", e.Message);
 
-                log.Error(Json(resE).ToString());
-                return Json(resE);
-
+                var result = Json(resE);
+                log.Error(logHelper.logInfoFormat(req, result, start));
+                return Json(result);
             }
         }
 
