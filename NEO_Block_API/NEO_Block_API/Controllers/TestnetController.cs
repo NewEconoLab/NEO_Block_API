@@ -16,6 +16,9 @@ namespace NEO_Block_API.Controllers
     [Route("api/[controller]")]
     public class TestnetController : Controller
     {
+        //接口返回最大忍受时间，超过则记录日志
+        int logExeTimeMax = 15;
+
         Api api = new Api("testnet");
         private ILog log = LogManager.GetLogger(Startup.repository.Name, typeof(TestnetController));
 
@@ -38,7 +41,10 @@ namespace NEO_Block_API.Controllers
                 string ipAddr = Request.HttpContext.Connection.RemoteIpAddress.ToString();
 
                 var result = Json(api.getRes(req, ipAddr));
-                log.Info(logHelper.logInfoFormat(req, result, start));
+                if (DateTime.Now.Subtract(start).TotalSeconds > logExeTimeMax)
+                {
+                    log.Info(logHelper.logInfoFormat(req, result, start));
+                }
                 return result;
             }
             catch (Exception e)
@@ -88,7 +94,10 @@ namespace NEO_Block_API.Controllers
                 string ipAddr = Request.HttpContext.Connection.RemoteIpAddress.ToString();
 
                 var result = Json(api.getRes(req, ipAddr));
-                log.Info(logHelper.logInfoFormat(req,result,start));
+                if (DateTime.Now.Subtract(start).TotalSeconds > logExeTimeMax)
+                {
+                    log.Info(logHelper.logInfoFormat(req, result, start));
+                }               
                 return result;
             }
             catch (Exception e)
