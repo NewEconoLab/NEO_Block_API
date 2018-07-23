@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using ThinNeo.Cryptography;
 using ThinNeo.Cryptography.Cryptography;
@@ -126,10 +127,19 @@ namespace ThinNeo
             }
             return outd;
         }
-        static System.Security.Cryptography.SHA256 sha256 = System.Security.Cryptography.SHA256.Create();
-        static RIPEMD160Managed ripemd160 = new RIPEMD160Managed();
+        //static System.Security.Cryptography.SHA256 sha256 = System.Security.Cryptography.SHA256.Create();
+        //static RIPEMD160Managed ripemd160 = new RIPEMD160Managed();
         //static System.Security.Cryptography.RIPEMD160 ripemd160 = System.Security.Cryptography.RIPEMD160.Create();
-
+        private static ThreadLocal<System.Security.Cryptography.SHA256> threadLocal = new ThreadLocal<System.Security.Cryptography.SHA256>(() => System.Security.Cryptography.SHA256.Create());
+        private static System.Security.Cryptography.SHA256 getSha256()
+        {
+            return threadLocal.Value;
+        }
+        private static ThreadLocal<RIPEMD160Managed> threadLocal2 = new ThreadLocal<RIPEMD160Managed>(() => new RIPEMD160Managed());
+        private static RIPEMD160Managed getRipemd160()
+        {
+            return threadLocal2.Value;
+        }
         public static string GetWifFromPrivateKey(byte[] prikey)
         {
             if (prikey.Length != 32)
@@ -141,6 +151,7 @@ namespace ThinNeo
             {
                 data[i + 1] = prikey[i];
             }
+            System.Security.Cryptography.SHA256 sha256 = getSha256();
             byte[] checksum = sha256.ComputeHash(data);
             checksum = sha256.ComputeHash(checksum);
             checksum = checksum.Take(4).ToArray();
@@ -160,6 +171,7 @@ namespace ThinNeo
             byte[] realdata = data.Take(data.Length - 4).ToArray();
 
             //验证,对前34字节进行进行两次hash取前4个字节
+            System.Security.Cryptography.SHA256 sha256 = getSha256();
             byte[] checksum = sha256.ComputeHash(realdata);
             checksum = sha256.ComputeHash(checksum);
             var sumcalc = checksum.Take(4);
@@ -192,14 +204,18 @@ namespace ThinNeo
         }
         public static Hash160 GetScriptHashFromScript(byte[] script)
         {
+            System.Security.Cryptography.SHA256 sha256 = getSha256();
             var scripthash = sha256.ComputeHash(script);
+            RIPEMD160Managed ripemd160 = getRipemd160();
             scripthash = ripemd160.ComputeHash(scripthash);
             return scripthash;
         }
         public static Hash160 GetScriptHashFromPublicKey(byte[] publicKey)
         {
             byte[] script = GetScriptFromPublicKey(publicKey);
+            System.Security.Cryptography.SHA256 sha256 = getSha256();
             var scripthash = sha256.ComputeHash(script);
+            RIPEMD160Managed ripemd160 = getRipemd160();
             scripthash = ripemd160.ComputeHash(scripthash);
             return scripthash;
         }
@@ -208,6 +224,7 @@ namespace ThinNeo
             byte[] data = new byte[20 + 1];
             data[0] = 0x17;
             Array.Copy(scripthash, 0, data, 1, 20);
+            System.Security.Cryptography.SHA256 sha256 = getSha256();
             var hash = sha256.ComputeHash(data);
             hash = sha256.ComputeHash(hash);
 
@@ -234,6 +251,7 @@ namespace ThinNeo
             var data = alldata.Take(alldata.Length - 4).ToArray();
             if (data[0] != 0x17)
                 throw new Exception("not a address");
+            System.Security.Cryptography.SHA256 sha256 = getSha256();
             var hash = sha256.ComputeHash(data);
             hash = sha256.ComputeHash(hash);
             var hashbts = hash.Take(4).ToArray();
@@ -266,6 +284,7 @@ namespace ThinNeo
             var pubkey = PublicKey.EncodePoint(false).Skip(1).ToArray();
 
             var ecdsa = new ThinNeo.Cryptography.ECC.ECDsa(prikey, ThinNeo.Cryptography.ECC.ECCurve.Secp256r1);
+            System.Security.Cryptography.SHA256 sha256 = getSha256();
             var hash = sha256.ComputeHash(message);
             var result = ecdsa.GenerateSignature(hash);
             var data1 = result[0].ToByteArray();
@@ -315,6 +334,7 @@ namespace ThinNeo
             var b2 = signature.Skip(32).Reverse().Concat(new byte[] { 0x00 }).ToArray();
             var num1 = new BigInteger(b1);
             var num2 = new BigInteger(b2);
+            System.Security.Cryptography.SHA256 sha256 = getSha256();
             var hash = sha256.ComputeHash(message);
             return ecdsa.VerifySignature(hash, num1, num2);
             //var PublicKey = ThinNeo.Cryptography.ECC.ECPoint.DecodePoint(pubkey, ThinNeo.Cryptography.ECC.ECCurve.Secp256r1);
