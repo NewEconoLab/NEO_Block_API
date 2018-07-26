@@ -22,7 +22,7 @@ namespace NEO_Block_API.Controllers
         */
         private ILog log = LogManager.GetLogger(Startup.repository.Name, typeof(MainnetController));
         
-        Api api = Api.getTestApi();
+        Api api = Api.getMainApi();
 
         [HttpGet]
         public JsonResult Get(string @jsonrpc, string @method, string @params, long @id)
