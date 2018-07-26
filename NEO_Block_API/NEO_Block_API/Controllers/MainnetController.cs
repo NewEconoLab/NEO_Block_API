@@ -14,11 +14,14 @@ namespace NEO_Block_API.Controllers
     [Route("api/[controller]")]
     public class MainnetController : Controller
     {
+        /*
         //接口返回最大忍受时间，超过则记录日志
         int logExeTimeMax = 15;
 
         Api api = new Api("mainnet");
         private ILog log = LogManager.GetLogger(Startup.repository.Name, typeof(MainnetController));
+        */
+        Api api = Api.getTestApi();
 
         [HttpGet]
         public JsonResult Get(string @jsonrpc, string @method, string @params, long @id)
@@ -39,10 +42,10 @@ namespace NEO_Block_API.Controllers
                 string ipAddr = Request.HttpContext.Connection.RemoteIpAddress.ToString();
 
                 var result = Json(api.getRes(req, ipAddr));
-                if (DateTime.Now.Subtract(start).TotalSeconds > logExeTimeMax)
-                {
-                    log.Info(logHelper.logInfoFormat(req, result, start));
-                }
+                //if (DateTime.Now.Subtract(start).TotalSeconds > logExeTimeMax)
+                //{
+                //    log.Info(logHelper.logInfoFormat(req, result, start));
+                //}
                 return result;
             }
             catch (Exception e)
@@ -50,7 +53,7 @@ namespace NEO_Block_API.Controllers
                 JsonPRCresponse_Error resE = new JsonPRCresponse_Error(0, -100, "Parameter Error", e.Message);
 
                 var result = Json(resE);
-                log.Error(logHelper.logInfoFormat(req, result, start));
+                //log.Error(logHelper.logInfoFormat(req, result, start));
                 return Json(result);
 
             }
@@ -92,10 +95,10 @@ namespace NEO_Block_API.Controllers
                     string ipAddr = Request.HttpContext.Connection.RemoteIpAddress.ToString();
 
                     var result = Json(api.getRes(req, ipAddr));
-                    if (DateTime.Now.Subtract(start).TotalSeconds > logExeTimeMax)
-                    {
-                        log.Info(logHelper.logInfoFormat(req, result, start));
-                    }
+                    //if (DateTime.Now.Subtract(start).TotalSeconds > logExeTimeMax)
+                    //{
+                    //    log.Info(logHelper.logInfoFormat(req, result, start));
+                    //}
                     return result;
             }
             catch (Exception e)
@@ -103,7 +106,7 @@ namespace NEO_Block_API.Controllers
                 JsonPRCresponse_Error resE = new JsonPRCresponse_Error(0, -100, "Parameter Error", e.Message);
 
                 var result = Json(resE);
-                log.Error(logHelper.logInfoFormat(req, result, start));
+                //log.Error(logHelper.logInfoFormat(req, result, start));
                 return Json(result);
             }
         }

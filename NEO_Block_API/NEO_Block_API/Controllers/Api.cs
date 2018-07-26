@@ -22,6 +22,11 @@ namespace NEO_Block_API.Controllers
         Contract ct = new Contract();
         Claim claim = new Claim();
 
+        private static Api testApi = new Api("testnet");
+        private static Api mainApi = new Api("mainnet");
+        public static Api getTestApi() { return testApi; }
+        public static Api getMainApi() { return mainApi; }
+
         public Api(string node) {
             netnode = node;
             switch (netnode) {
