@@ -118,32 +118,37 @@ namespace NEO_Block_API.lib
             int blockDataHeight = -1;
             int txDataHeight = -1;
             int utxoDataHeight = -1;
-            int notifyDataHeight = -1;
+            int notifyDataHeight = -1;           
+            int totalsysfeeDataHeight = -1;
+            int NEP5DataHeight = -1;
             int fulllogDataHeight = -1;
 
             var client = new MongoClient(mongodbConnStr);
             var database = client.GetDatabase(mongodbDatabase);
 
-            var collection = database.GetCollection<BsonDocument>("block");
-            var sortBson = BsonDocument.Parse("{index:-1}");
-            var query = collection.Find(new BsonDocument()).Sort(sortBson).Limit(1).ToList();
-            if (query.Count > 0)
-            {blockDataHeight = (int)query[0]["index"];}
+            //var collection = database.GetCollection<BsonDocument>("block");
+            //var sortBson = BsonDocument.Parse("{index:-1}");
+            //var query = collection.Find(new BsonDocument()).Sort(sortBson).Limit(1).ToList();
+            //if (query.Count > 0)
+            //{blockDataHeight = (int)query[0]["index"];}
 
-            collection = database.GetCollection<BsonDocument>("tx");
-            sortBson = BsonDocument.Parse("{blockindex:-1}");
-            query = collection.Find(new BsonDocument()).Sort(sortBson).Limit(1).ToList();
-            if (query.Count > 0)
-            { txDataHeight = (int)query[0]["blockindex"]; }
+            //collection = database.GetCollection<BsonDocument>("tx");
+            //sortBson = BsonDocument.Parse("{blockindex:-1}");
+            //query = collection.Find(new BsonDocument()).Sort(sortBson).Limit(1).ToList();
+            //if (query.Count > 0)
+            //{ txDataHeight = (int)query[0]["blockindex"]; }
 
-            collection = database.GetCollection<BsonDocument>("system_counter");
-            query = collection.Find(new BsonDocument()).ToList();
+            var collection = database.GetCollection<BsonDocument>("system_counter");
+            var query = collection.Find(new BsonDocument()).ToList();
             if (query.Count > 0)
             {
                 foreach (var q in query)
                 {
+                    if ((string)q["counter"] == "block") { blockDataHeight = (int)q["lastBlockindex"]; txDataHeight = blockDataHeight; };
                     if ((string)q["counter"] == "utxo") { utxoDataHeight = (int)q["lastBlockindex"]; };
-                    if ((string)q["counter"] == "notify") { notifyDataHeight = (int)q["lastBlockindex"]; };
+                    if ((string)q["counter"] == "notify") { notifyDataHeight = (int)q["lastBlockindex"]; };                  
+                    if ((string)q["counter"] == "totalsysfee") { totalsysfeeDataHeight = (int)q["lastBlockindex"]; };
+                    if ((string)q["counter"] == "NEP5") { NEP5DataHeight = (int)q["lastBlockindex"]; };
                     if ((string)q["counter"] == "fulllog") { fulllogDataHeight = (int)q["lastBlockindex"]; };
                 }
             }
@@ -156,6 +161,8 @@ namespace NEO_Block_API.lib
                 { "txDataHeight", txDataHeight },
                 { "utxoDataHeight", utxoDataHeight },
                 { "notifyDataHeight", notifyDataHeight },
+                { "totalsysfee", totalsysfeeDataHeight },
+                { "NEP5", NEP5DataHeight },
                 { "fulllogDataHeight", fulllogDataHeight }
             };
             JArray JA = new JArray
