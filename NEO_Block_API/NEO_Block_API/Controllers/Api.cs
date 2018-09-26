@@ -1,6 +1,7 @@
 ﻿using NEO_Block_API.lib;
 using NEO_Block_API.RPC;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -84,12 +85,13 @@ namespace NEO_Block_API.Controllers
                         };
                         result = JA;
                         break;
-                    case "getdatablockheight":
-                        result = mh.Getdatablockheight(mongodbConnStr, mongodbDatabase);
+                    case "getcliversion":
+                        result = getJAbyKV("cliversion", (string)JObject.Parse(hh.Post(neoCliJsonRPCUrl, "{'jsonrpc':'2.0','method':'getversion','params':[],'id':1}", System.Text.Encoding.UTF8, 1))["result"]["useragent"]);
                         break;
-                    case "getblockcount":
-                        //resultStr = "[{blockcount:" + mh.GetDataCount(mongodbConnStr, mongodbDatabase, "block") + "}]";
-                        result = getJAbyKV("blockcount", (long)(mh.GetData(mongodbConnStr, mongodbDatabase, "system_counter", "{counter:'block'}")[0]["lastBlockindex"]) + 1);
+                    case "getclirawmempool":
+                        JObject rawmempoolJ = new JObject();
+                        rawmempoolJ.Add("clirawmempool", JObject.Parse(hh.Post(neoCliJsonRPCUrl, "{'jsonrpc':'2.0','method':'getrawmempool','params':[],'id':1}", System.Text.Encoding.UTF8, 1))["result"]);
+                        result = getJAbyJ(rawmempoolJ);
                         break;
                     case "getcliblockcount":
                         var resp = hh.Post(neoCliJsonRPCUrl, "{'jsonrpc':'2.0','method':'getblockcount','params':[],'id':1}", System.Text.Encoding.UTF8, 1);
@@ -97,6 +99,14 @@ namespace NEO_Block_API.Controllers
                         string cliResultStr = (string)JObject.Parse(resp)["result"];
                         result = getJAbyKV("cliblockcount", cliResultStr);
                         break;
+                    case "getdatablockheight":
+                        result = mh.Getdatablockheight(mongodbConnStr, mongodbDatabase);
+                        break;
+                    case "getblockcount":
+                        //resultStr = "[{blockcount:" + mh.GetDataCount(mongodbConnStr, mongodbDatabase, "block") + "}]";
+                        result = getJAbyKV("blockcount", (long)(mh.GetData(mongodbConnStr, mongodbDatabase, "system_counter", "{counter:'block'}")[0]["lastBlockindex"]) + 1);
+                        break;
+
                     case "gettxcount":
                         //resultStr = "[{txcount:" + mh.GetDataCount(mongodbConnStr, mongodbDatabase, "tx") + "}]";
                         //result = getJAbyKV("txcount", mh.GetDataCount(mongodbConnStr, mongodbDatabase, "tx"));
