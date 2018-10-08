@@ -259,7 +259,16 @@ namespace NEO_Block_API.Controllers
                     case "getclaimtxhex":
                         string addrClaim = (string)req.@params[0];
 
-                        result = getJAbyKV("claimtxhex", tx.getClaimTxHex(addrClaim, claim.getClaimGas(mongodbConnStr, mongodbDatabase, addrClaim)));
+                        JObject claimgasJ = claim.getClaimGas(mongodbConnStr, mongodbDatabase, addrClaim);
+                        if (claimgasJ["errorCode"] != null)
+                        {
+                            result = getJAbyJ(claimgasJ);
+                        }
+                        else
+                        {
+                            result = getJAbyKV("claimtxhex", tx.getClaimTxHex(addrClaim, claimgasJ));
+                        }
+                        
                         break;
                     case "getbalance":
                         findFliter = "{addr:'" + req.@params[0] + "',used:''}";
@@ -693,6 +702,12 @@ namespace NEO_Block_API.Controllers
                         result = new JArray() { JOresult };
 
                         break;
+                }
+                if (result[0]["errorCode"] != null)
+                {
+                    JsonPRCresponse_Error resE = new JsonPRCresponse_Error(req.id, (int)result[0]["errorCode"], (string)result[0]["errorMsg"], (string)result[0]["errorData"]);
+
+                    return resE;
                 }
                 if (result.Count == 0)
                 {

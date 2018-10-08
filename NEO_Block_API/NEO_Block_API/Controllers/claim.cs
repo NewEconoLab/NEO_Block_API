@@ -26,32 +26,49 @@ namespace NEO_Block_API.Controllers
                 //未使用，未领取(不可领取GAS)
                 findFliter = "{addr:'" + address + "','asset':'0xc56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b','used':'','claimed':''}";
             }
-            JArray gasIssueJA = mh.GetData(mongodbConnStr, mongodbDatabase, "utxo", findFliter);
-            
 
-            foreach (JObject utxo in gasIssueJA)
-            {
-                int start = (int)utxo["createHeight"];
-                int end = -1;
-                if (isGetUsed)
-                {
-                    end = (int)utxo["useHeight"] - 1; //转出的这块的gas属于转入地址
-                }
-                else {
-                    //未花费以目前高度计算
-                    end = (int)mh.Getdatablockheight(mongodbConnStr, mongodbDatabase).First()["blockDataHeight"];
-                }
-                int value = (int)utxo["value"];
-
-                decimal issueSysfee = mh.GetTotalSysFeeByBlock(mongodbConnStr, mongodbDatabase, end) - mh.GetTotalSysFeeByBlock(mongodbConnStr, mongodbDatabase, start);
-                decimal issueGasInBlock = countGas(start, end);
-
-                issueGas += (issueSysfee+issueGasInBlock)/100000000 * value;
-            }
+            //统计有多少NEO UTXO
+            long utxoCount = mh.GetDataCount(mongodbConnStr, mongodbDatabase, "utxo", findFliter);
 
             JObject J = new JObject();
-            J.Add("gas", issueGas);
-            J.Add("claims", gasIssueJA);
+
+            //只有UTXO小于等于50才处理
+            int UTXOThreshold = 50;
+            if (utxoCount <= UTXOThreshold)
+            {
+                JArray gasIssueJA = mh.GetData(mongodbConnStr, mongodbDatabase, "utxo", findFliter);
+
+
+                foreach (JObject utxo in gasIssueJA)
+                {
+                    int start = (int)utxo["createHeight"];
+                    int end = -1;
+                    if (isGetUsed)
+                    {
+                        end = (int)utxo["useHeight"] - 1; //转出的这块的gas属于转入地址
+                    }
+                    else
+                    {
+                        //未花费以目前高度计算
+                        end = (int)mh.Getdatablockheight(mongodbConnStr, mongodbDatabase).First()["blockDataHeight"];
+                    }
+                    int value = (int)utxo["value"];
+
+                    decimal issueSysfee = mh.GetTotalSysFeeByBlock(mongodbConnStr, mongodbDatabase, end) - mh.GetTotalSysFeeByBlock(mongodbConnStr, mongodbDatabase, start);
+                    decimal issueGasInBlock = countGas(start, end);
+
+                    issueGas += (issueSysfee + issueGasInBlock) / 100000000 * value;
+                }
+
+                J.Add("gas", issueGas);
+                J.Add("claims", gasIssueJA);
+            }
+            else
+            {
+                J.Add("errorCode", "-10");
+                J.Add("errorMsg", "The data is too large to process");
+                J.Add("errorData", "ClaimGas UTXO Threshold is " + UTXOThreshold);
+            }
 
             return J;
         }
