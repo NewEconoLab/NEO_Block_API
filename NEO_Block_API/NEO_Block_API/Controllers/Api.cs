@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Globalization;
 
 namespace NEO_Block_API.Controllers
 {
@@ -225,7 +226,7 @@ namespace NEO_Block_API.Controllers
                     case "getutxostopay":
                         string address = (string)req.@params[0];
                         string assetID = ((string)req.@params[1]).formatHexStr();
-                        decimal amount = decimal.Parse(req.@params[2].ToString());
+                        decimal amount = decimal.Parse(req.@params[2].ToString(), NumberStyles.Float);
                         bool isBigFirst = false; //默认先用小的。
 
                         if (req.@params.Count() == 4)
@@ -307,7 +308,7 @@ namespace NEO_Block_API.Controllers
                         findFliter = "{addr:'" + addrOut + "',used:''}";
                         JArray outputJA = mh.GetData(mongodbConnStr, mongodbDatabase, "utxo", findFliter);
 
-                        result = getJAbyKV("transfertxhex", tx.getTransferTxHex(outputJA, (string)req.@params[0], (string)req.@params[1], (string)req.@params[2], decimal.Parse(req.@params[3].ToString())));
+                        result = getJAbyKV("transfertxhex", tx.getTransferTxHex(outputJA, (string)req.@params[0], (string)req.@params[1], (string)req.@params[2], decimal.Parse(req.@params[3].ToString(), NumberStyles.Float)));
 
                         //result = new JArray
                         //{
@@ -361,7 +362,7 @@ namespace NEO_Block_API.Controllers
                         JArray outputJAPayFee = mh.GetData(mongodbConnStr, mongodbDatabase, "utxo", findFliter);
 
                         string invokeScript = (string)req.@params[1];
-                        decimal invokeScriptFee = decimal.Parse(req.@params[2].ToString());
+                        decimal invokeScriptFee = decimal.Parse(req.@params[2].ToString(), NumberStyles.Float);
 
                         result = getJAbyKV("invoketxhex", tx.getInvokeTxHex(outputJAPayFee, addrPayFee, invokeScript, invokeScriptFee));
                         break;
