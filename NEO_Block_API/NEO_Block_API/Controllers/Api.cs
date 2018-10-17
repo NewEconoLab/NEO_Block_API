@@ -138,6 +138,12 @@ namespace NEO_Block_API.Controllers
                     case "getblocks":
                         sortStr = "{index:-1}";
                         result = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "block", sortStr, int.Parse(req.@params[0].ToString()), int.Parse(req.@params[1].ToString()));
+                        result = new JArray() { result.Select(p => new JObject() {
+                            { "index", p["index"] },
+                            { "size", p["size"] },
+                            { "time", p["time"] },
+                            { "txcount", ((JArray)p["tx"]).Count }
+                        }).ToArray() };
                         break;
                     case "getrawtransaction":
                         findFliter = "{txid:'" + ((string)req.@params[0]).formatHexStr() + "'}";
