@@ -102,6 +102,10 @@ namespace NEO_Block_API.Controllers
                 string invokeSc = ThinNeo.Helper.Bytes2HexString(tmpSb.ToArray());
                 JObject invokeRs = invokeScript(neoCliJsonRPCUrl, invokeSc);
 
+                res.Add("script", invokeRs["script"]);
+                res.Add("state", invokeRs["state"]);
+                res.Add("gas_consumed", invokeRs["gas_consumed"]);
+
                 string state = invokeRs["state"].ToString();
                 JArray stack = (JArray)invokeRs["stack"];
                 JObject stack1 = null;
@@ -118,6 +122,7 @@ namespace NEO_Block_API.Controllers
                 }
                 stackList.Add(stack1);
             }
+            
             res.Add("stack", stackList);
 
             // debug info
