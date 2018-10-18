@@ -136,13 +136,18 @@ namespace NEO_Block_API.Controllers
                         result = getJAbyKV("time", time);
                         break;
                     case "getblocks":
-                        sortStr = "{index:-1}";
-                        result = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "block", sortStr, int.Parse(req.@params[0].ToString()), int.Parse(req.@params[1].ToString()));
-                        result = new JArray() { result.Select(p => new JObject() {
-                            { "index", p["index"] },
-                            { "size", p["size"] },
-                            { "time", p["time"] },
-                            { "txcount", ((JArray)p["tx"]).Count }
+                        long lastBlockindex = (long)(mh.GetData(mongodbConnStr, mongodbDatabase, "system_counter", "{counter:'block'}")[0]["lastBlockindex"]);
+                        sortStr = "{index:-1}"; // 15  10 
+                        int pageCount = int.Parse(req.@params[0].ToString());
+                        int pageNum = int.Parse(req.@params[1].ToString());
+                        string fieldStr = new JObject() { { "_id", 0},{ "index",1 }, { "size", 1 }, { "time", 1 }, { "tx", 1 } }.ToString();
+                        string filter = new JObject() { {"index", new JObject() { { "$gt", lastBlockindex - pageCount * pageNum}, { "$lte", lastBlockindex - pageCount*(pageNum-1) } } } }.ToString();
+                        result = mh.GetDataPagesWithField(mongodbConnStr, mongodbDatabase, "block", fieldStr, sortStr, pageCount, 1, filter);
+                        result = new JArray() { result.Select(p => {
+                            JObject jo = (JObject)p;
+                            jo.Add("txcount", ((JArray)p["tx"]).Count);
+                            jo.Remove("tx");
+                            return jo;
                         }).ToArray() };
                         break;
                     case "getrawtransaction":
