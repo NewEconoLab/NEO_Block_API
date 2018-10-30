@@ -47,7 +47,55 @@ namespace NEO_Block_API.Controllers
             return resultJ;
         }
 
-        
+        public JObject callContractForTestMulti(string neoCliJsonRPCUrl, List<string> scripthashs, JArray paramsJA)
+        {
+            JObject res = new JObject();
+            JArray stackList = new JArray();
+            int n = 0;
+            foreach (var scripthash in scripthashs)
+            {
+                ThinNeo.ScriptBuilder tmpSb = new ThinNeo.ScriptBuilder();
+                httpHelper hh = new httpHelper();
+                var json = MyJson.Parse(JsonConvert.SerializeObject(paramsJA[n])).AsList();
+                var list = json.AsList();
+                for (int i = list.Count - 1; i >= 0; i--)
+                {
+                    tmpSb.EmitParamJson(list[i]);
+                }
+
+                var scripthashReverse = ThinNeo.Helper.HexString2Bytes(scripthash).Reverse().ToArray();
+                tmpSb.EmitAppCall(scripthashReverse);
+                string invokeSc = ThinNeo.Helper.Bytes2HexString(tmpSb.ToArray());
+                JObject invokeRs = invokeScript(neoCliJsonRPCUrl, invokeSc);
+                /**
+                 * JObject 不能存放相同字段，为将其与其他接口调用区分开来，现单端改名为-Multi结尾的方法
+                 */ 
+                /*
+                res.Add("script", invokeRs["script"]);
+                res.Add("state", invokeRs["state"]);
+                res.Add("gas_consumed", invokeRs["gas_consumed"]);
+                */
+                string state = invokeRs["state"].ToString();
+                JArray stack = (JArray)invokeRs["stack"];
+                JObject stack1 = null;
+                if (state.StartsWith("FAULT"))
+                {
+                    // 调用合约出错，填充占位
+                    stack1 = new JObject();
+                    stack1.Add("type", "FAULT");
+                    stack1.Add("value", "");
+                }
+                else
+                {
+                    stack1 = (JObject)stack[0];
+                }
+                stackList.Add(stack1);
+            }
+
+            res.Add("stack", stackList);
+            return res;
+
+        }
         public JObject callContractForTest(string neoCliJsonRPCUrl, List<string> scripthashs, JArray paramsJA)
         {
             //string script = (string)getContractState(neoCliJsonRPCUrl, scripthash)["script"];
@@ -101,11 +149,11 @@ namespace NEO_Block_API.Controllers
                 tmpSb.EmitAppCall(scripthashReverse);
                 string invokeSc = ThinNeo.Helper.Bytes2HexString(tmpSb.ToArray());
                 JObject invokeRs = invokeScript(neoCliJsonRPCUrl, invokeSc);
-
+                
                 res.Add("script", invokeRs["script"]);
                 res.Add("state", invokeRs["state"]);
                 res.Add("gas_consumed", invokeRs["gas_consumed"]);
-
+                
                 string state = invokeRs["state"].ToString();
                 JArray stack = (JArray)invokeRs["stack"];
                 JObject stack1 = null;

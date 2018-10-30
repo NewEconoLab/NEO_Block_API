@@ -495,7 +495,7 @@ namespace NEO_Block_API.Controllers
                                 nep5Hashs.Add(abt.assetid);
                                 queryParams.Add(JArray.Parse("['(str)balanceOf',['(hex)" + NEP5allAssetOfAddrHashHex + "']]"));                               
                             }
-                            JArray NEP5allAssetBalanceJA = (JArray)ct.callContractForTest(neoCliJsonRPCUrl, nep5Hashs, queryParams)["stack"];
+                            JArray NEP5allAssetBalanceJA = (JArray)ct.callContractForTestMulti(neoCliJsonRPCUrl, nep5Hashs, queryParams)["stack"];
                             var a = Newtonsoft.Json.JsonConvert.SerializeObject(NEP5allAssetBalanceJA);
                             foreach (var abt in addrAssetBalancesTemp)
                             {
