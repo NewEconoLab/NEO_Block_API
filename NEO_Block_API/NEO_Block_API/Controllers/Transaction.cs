@@ -266,8 +266,19 @@ namespace NEO_Block_API.Controllers
             httpHelper hh = new httpHelper();
             var resp = hh.Post(neoCliJsonRPCUrl, "{'jsonrpc':'2.0','method':'sendrawtransaction','params':['" + txSigned + "'],'id':1}", System.Text.Encoding.UTF8, 1);
 
-            bool isSendSuccess = (bool)JObject.Parse(resp)["result"];
             JObject Jresult = new JObject();
+            bool isSendSuccess = false;
+            var res = JObject.Parse(resp);
+            if (res["error"] != null && res["error"]["message"] != null)
+            {
+                isSendSuccess = false;
+                Jresult.Add("errorMessage", res["error"]["message"]);
+            } else
+            {
+                isSendSuccess = (bool)JObject.Parse(resp)["result"];
+            }
+            //bool isSendSuccess = (bool)JObject.Parse(resp)["result"];
+            //JObject Jresult = new JObject();
             Jresult.Add("sendrawtransactionresult", isSendSuccess);
             if (isSendSuccess)
             {
