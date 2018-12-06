@@ -28,6 +28,7 @@ namespace NEO_Block_API.Controllers
         private static Api mainApi = new Api("mainnet");
         public static Api getTestApi() { return testApi; }
         public static Api getMainApi() { return mainApi; }
+        private Monitor monitor;
 
         public Api(string node) {
             netnode = node;
@@ -43,6 +44,8 @@ namespace NEO_Block_API.Controllers
                     neoCliJsonRPCUrl = mh.neoCliJsonRPCUrl_mainnet;
                     break;
             }
+
+            initMonitor();
         }
 
         private JArray getJAbyKV(string key, object value)
@@ -75,6 +78,7 @@ namespace NEO_Block_API.Controllers
             string sortStr = string.Empty;
             try
             {
+                point(req.method);
                 switch (req.method)
                 {
                     case "getnodetype":
@@ -742,6 +746,22 @@ namespace NEO_Block_API.Controllers
             res.result = result;
 
             return res;
+        }
+
+        private void initMonitor()
+        {
+            string startMonitorFlag = mh.startMonitorFlag;
+            if (startMonitorFlag == "1")
+            {
+                monitor = new Monitor();
+            }
+        }
+        private void point(string method)
+        {
+            if (monitor != null)
+            {
+                monitor.point(netnode, method);
+            }
         }
     }
 }

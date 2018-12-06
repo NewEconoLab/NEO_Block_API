@@ -24,6 +24,8 @@ namespace NEO_Block_API.lib
         public string mongodbConnStr_NeonOnline = string.Empty;
         public string mongodbDatabase_NeonOnline = string.Empty;
 
+        public string startMonitorFlag = string.Empty;
+
         public mongoHelper() {
             var config = new ConfigurationBuilder()
                 .AddInMemoryCollection()    //将配置文件的数据加载到内存中
@@ -40,6 +42,8 @@ namespace NEO_Block_API.lib
 
             mongodbConnStr_NeonOnline = config["mongodbConnStr_NeonOnline"];
             mongodbDatabase_NeonOnline = config["mongodbDatabase_NeonOnline"];
+
+            startMonitorFlag = config["startMonitorFlag"];
         }
 
         public JArray GetData(string mongodbConnStr,string mongodbDatabase, string coll,string findFliter)
