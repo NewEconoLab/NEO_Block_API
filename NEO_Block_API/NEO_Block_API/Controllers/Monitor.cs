@@ -69,7 +69,7 @@ namespace NEO_Block_API.Controllers
             }
             if (sum == 0) return;
 
-            sb.Append("sum:" + sum + "\r\n");
+            sb.Append("sum:" + sum.ToString().PadLeft(6) + "\t");
 
             //
             log(now, sb);
@@ -79,6 +79,7 @@ namespace NEO_Block_API.Controllers
         {
             string path = string.Format("tps_{0}.txt", now.ToString("yyyyMMdd"));
             string data = sb.Append(now.ToString("yyyyMMdd HH:mm:ss.fff")).Append("\r\n").ToString();
+            data = data.Replace("\r\nsum:", "\tsum:");
             File.AppendAllText(path, data);
         }
 
