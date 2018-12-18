@@ -41,7 +41,7 @@ namespace NEO_Block_API.Controllers
 
                 foreach (JObject utxo in gasIssueJA)
                 {
-                    int start = (int)utxo["createHeight"];
+                    int start = (int)utxo["createHeight"] - 1;//转入的这个块，属于当前地址
                     int end = -1;
                     if (isGetUsed)
                     {
