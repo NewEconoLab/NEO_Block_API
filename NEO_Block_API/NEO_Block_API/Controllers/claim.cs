@@ -41,7 +41,7 @@ namespace NEO_Block_API.Controllers
 
                 foreach (JObject utxo in gasIssueJA)
                 {
-                    int start = (int)utxo["createHeight"] - 1;//转入的这个块，属于当前地址
+                    int start = (int)utxo["createHeight"];
                     int end = -1;
                     if (isGetUsed)
                     {
@@ -54,7 +54,7 @@ namespace NEO_Block_API.Controllers
                     }
                     int value = (int)utxo["value"];
 
-                    decimal issueSysfee = mh.GetTotalSysFeeByBlock(mongodbConnStr, mongodbDatabase, end) - mh.GetTotalSysFeeByBlock(mongodbConnStr, mongodbDatabase, start);
+                    decimal issueSysfee = mh.GetTotalSysFeeByBlock(mongodbConnStr, mongodbDatabase, end) - mh.GetTotalSysFeeByBlock(mongodbConnStr, mongodbDatabase, start - 1);//转入的这个块，属于当前地址，由于差额计算方法，需要开始-1
                     decimal issueGasInBlock = countGas(start, end);
 
                     issueGas += (issueSysfee + issueGasInBlock) / 100000000 * value;
