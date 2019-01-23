@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Globalization;
+using NEO_Block_API.Services;
 
 namespace NEO_Block_API.Controllers
 {
@@ -23,6 +24,7 @@ namespace NEO_Block_API.Controllers
         Transaction tx = new Transaction();
         Contract ct = new Contract();
         Claim claim = new Claim();
+        NotifyService notifyService = null;
 
         private static Api testApi = new Api("testnet");
         private static Api mainApi = new Api("mainnet");
@@ -37,11 +39,23 @@ namespace NEO_Block_API.Controllers
                     mongodbConnStr = mh.mongodbConnStr_testnet;
                     mongodbDatabase = mh.mongodbDatabase_testnet;
                     neoCliJsonRPCUrl = mh.neoCliJsonRPCUrl_testnet;
+                    notifyService = new NotifyService
+                    {
+                        mh = mh,
+                        mongodbConnStr = mh.mongodbConnStr_testnet,
+                        mongodbDatabase = mh.mongodbDatabase_testnet,
+                    };
                     break;
                 case "mainnet":
                     mongodbConnStr = mh.mongodbConnStr_mainnet;
                     mongodbDatabase = mh.mongodbDatabase_mainnet;
                     neoCliJsonRPCUrl = mh.neoCliJsonRPCUrl_mainnet;
+                    notifyService = new NotifyService
+                    {
+                        mh = mh,
+                        mongodbConnStr = mh.mongodbConnStr_mainnet,
+                        mongodbDatabase = mh.mongodbDatabase_mainnet,
+                    };
                     break;
             }
 
@@ -718,6 +732,16 @@ namespace NEO_Block_API.Controllers
                         result = new JArray() { JOresult };
 
                         break;
+
+                    // ChangeLog: 新增获取notify接口
+                    case "getnotifycounter":
+                        result = notifyService.getNotifyCounter();
+                        break;
+                    case "getnotifybyhash":
+                        result = notifyService.getNotifyByHash(JArray.Parse(req.@params[1].ToString()), int.Parse(req.@params[0].ToString()));
+                        break;
+
+
                 }
                 if (result != null && result.Count > 0 && result[0]["errorCode"] != null)
                 {
