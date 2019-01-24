@@ -27,6 +27,7 @@ namespace NEO_Block_API.Services
 
         public JArray getNotifyByHash(JArray hashJA, int startBlockindex, int pageSize=10)
         {
+            if (pageSize > 10) pageSize = 10;
             var hashs = hashJA.Select(p => p.ToString()).ToArray();
             var findJO = toNotifyFilter(hashs);
             findJO.Add("blockindex", new JObject() { {"$gt", startBlockindex }, { "$lte", startBlockindex+pageSize} });

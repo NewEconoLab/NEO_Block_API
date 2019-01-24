@@ -738,7 +738,14 @@ namespace NEO_Block_API.Controllers
                         result = notifyService.getNotifyCounter();
                         break;
                     case "getnotifybyhash":
-                        result = notifyService.getNotifyByHash(JArray.Parse(req.@params[1].ToString()), int.Parse(req.@params[0].ToString()));
+                        var cc = req.@params.Count();
+                        if(req.@params.Count() <3)
+                        {
+                            result = notifyService.getNotifyByHash(JArray.Parse(req.@params[1].ToString()), int.Parse(req.@params[0].ToString()));
+                        }
+                        else {
+                            result = notifyService.getNotifyByHash(JArray.Parse(req.@params[2].ToString()), int.Parse(req.@params[0].ToString()), int.Parse(req.@params[1].ToString()));
+                        }
                         break;
 
 
