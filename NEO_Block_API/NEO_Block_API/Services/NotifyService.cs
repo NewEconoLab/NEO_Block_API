@@ -29,19 +29,54 @@ namespace NEO_Block_API.Services
         {
             if (pageSize > 10) pageSize = 10;
             var hashs = hashJA.Select(p => p.ToString()).ToArray();
-            var findJO = toNotifyFilter(hashs);
+            var findJO = toFilter(hashs, "executions.notifications.contract");
             findJO.Add("blockindex", new JObject() { {"$gt", startBlockindex }, { "$lte", startBlockindex+pageSize} });
             string findStr = findJO.ToString();
             return mh.GetData(mongodbConnStr, mongodbDatabase, "notify", findStr);
         }
 
-        private JObject toNotifyFilter(string[] hashs)
+        private JObject toFilter(string[] hashs, string field)
         {
             if (hashs == null || hashs.Count() == 0) return null;
-            if (hashs.Count() == 1) return new JObject() { { "executions.notifications.contract", hashs[0]} };
+            if (hashs.Count() == 1) return new JObject() { { field, hashs[0]} };
             return new JObject(){{ "$or", new JArray{
-                hashs.Distinct().Select(p => new JObject() { "executions.notifications.contract", p}).ToArray()
+                hashs.Distinct().Select(p => new JObject() { { field, p } }).ToArray()
             } } };
+        }
+        private JObject toFilter(long[] indexs, string field)
+        {
+            if (indexs == null || indexs.Count() == 0) return null;
+            if (indexs.Count() == 1) return new JObject() { { field, indexs[0] } };
+            return new JObject(){{ "$or", new JArray{
+                indexs.Distinct().Select(p => new JObject() { { field, p } }).ToArray()
+            } } };
+        }
+        private JObject toReturn(string[] fields, bool removeId=true)
+        {
+            JObject obj = new JObject();
+            foreach (var field in fields)
+            {
+                obj.Add(field, 1);
+            }
+            if (removeId) obj.Add("_id", 0);
+            return obj;
+        }
+
+
+        public JArray getNep5AssetInfo(JArray hashJA)
+        {
+            var hashs = hashJA.Select(p => p.ToString()).ToArray();
+            string findStr = toFilter(hashs, "assetid").ToString();
+            return mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5asset", findStr);
+        }
+
+        public JArray getBlockInfo(JArray indexJA)
+        {
+            var indexs = indexJA.Select(p => long.Parse(p.ToString())).ToArray();
+            string findStr = toFilter(indexs, "index").ToString();
+            string fieldStr = toReturn(new string[] {"index", "time", "hash"}).ToString();
+
+            return mh.GetDataWithField(mongodbConnStr, mongodbDatabase, "block", fieldStr, findStr);
         }
     }
 }

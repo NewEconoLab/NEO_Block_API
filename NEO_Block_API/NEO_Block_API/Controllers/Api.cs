@@ -747,7 +747,12 @@ namespace NEO_Block_API.Controllers
                             result = notifyService.getNotifyByHash(JArray.Parse(req.@params[2].ToString()), int.Parse(req.@params[0].ToString()), int.Parse(req.@params[1].ToString()));
                         }
                         break;
-
+                    case "getBlockInfo":
+                        result = notifyService.getBlockInfo(JArray.Parse(req.@params[0].ToString()));
+                        break;
+                    case "getNep5AssetInfo":
+                        result = notifyService.getNep5AssetInfo(JArray.Parse(req.@params[0].ToString()));
+                        break;
 
                 }
                 if (result != null && result.Count > 0 && result[0]["errorCode"] != null)
