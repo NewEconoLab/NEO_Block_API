@@ -72,11 +72,19 @@ namespace NEO_Block_API.Services
 
         public JArray getBlockInfo(JArray indexJA)
         {
+            if (indexJA == null) return getBlockInfoTop3();
             var indexs = indexJA.Select(p => long.Parse(p.ToString())).ToArray();
             string findStr = toFilter(indexs, "index").ToString();
             string fieldStr = toReturn(new string[] {"index", "time", "hash"}).ToString();
 
             return mh.GetDataWithField(mongodbConnStr, mongodbDatabase, "block", fieldStr, findStr);
+        }
+        private JArray getBlockInfoTop3()
+        {
+            string findStr = "{}";
+            string fieldStr = new JObject() { { "index", 1 }, { "hash", 1 }, { "time", 1 }, { "_id", 0 } }.ToString();
+            string sortStr = new JObject() { { "index", -1 } }.ToString();
+            return mh.GetDataPagesWithField(mongodbConnStr, mongodbDatabase, "block", fieldStr, sortStr, 3, 1, findStr);
         }
     }
 }

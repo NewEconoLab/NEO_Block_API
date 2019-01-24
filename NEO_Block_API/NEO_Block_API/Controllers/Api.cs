@@ -748,7 +748,12 @@ namespace NEO_Block_API.Controllers
                         }
                         break;
                     case "getBlockInfo":
-                        result = notifyService.getBlockInfo(JArray.Parse(req.@params[0].ToString()));
+                        JArray filterJA = null;
+                        if(req.@params.Count() > 0)
+                        {
+                            filterJA = JArray.Parse(req.@params[0].ToString());
+                        }
+                        result = notifyService.getBlockInfo(filterJA);
                         break;
                     case "getNep5AssetInfo":
                         result = notifyService.getNep5AssetInfo(JArray.Parse(req.@params[0].ToString()));
