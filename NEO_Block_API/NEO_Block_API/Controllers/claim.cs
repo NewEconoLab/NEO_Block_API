@@ -11,6 +11,49 @@ namespace NEO_Block_API.Controllers
     {
         mongoHelper mh = new mongoHelper();
 
+        public JArray getClaimGasUtxoList(string mongodbConnStr, string mongodbDatabase, string address, bool isGetUsed = true, int pageNum=1, int pageSize=10)
+        {
+            string findFliter = string.Empty;
+            if (isGetUsed)
+            {
+                //已使用，未领取(可领取GAS)
+                findFliter = "{addr:'" + address + "','asset':'0xc56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b','used':{$ne:''},'claimed':''}";
+            }
+            else
+            {
+                //未使用，未领取(不可领取GAS)
+                findFliter = "{addr:'" + address + "','asset':'0xc56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b','used':'','claimed':''}";
+            }
+
+            //统计有多少NEO UTXO
+            long utxoCount = mh.GetDataCount(mongodbConnStr, mongodbDatabase, "utxo", findFliter);
+            if (utxoCount == 0) return new JArray { new JObject() { { "count", 0 }, { "list", new JArray { } } } };
+            //
+            string sortStr = new JObject() { { "createHeight", 1 } }.ToString();
+            var gasIssueJA = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "utxo", sortStr, pageSize, pageNum, findFliter);
+
+            int curHeight = (int)mh.Getdatablockheight(mongodbConnStr, mongodbDatabase).First()["blockDataHeight"];
+            var res = gasIssueJA.Select(utxo => {
+                int start = (int)utxo["createHeight"];
+                int end = (isGetUsed ? (int)utxo["useHeight"] - 1 : curHeight);
+                int value = (int)utxo["value"];
+                decimal issueSysfee = mh.GetTotalSysFeeByBlock(mongodbConnStr, mongodbDatabase, end) - mh.GetTotalSysFeeByBlock(mongodbConnStr, mongodbDatabase, start - 1);//转入的这个块，属于当前地址，由于差额计算方法，需要开始-1
+                decimal issueGasInBlock = countGas(start, end);
+                decimal issueGas = (issueSysfee + issueGasInBlock) / 100000000 * value;
+                //
+                var jo = (JObject)utxo;
+                jo.Add("gas", issueGas.ToString());
+                return jo;
+            }).ToArray();
+
+            return new JArray{new JObject()
+            {
+                { "count", utxoCount},
+                { "list", new JArray{res } }
+            } };
+
+        }
+
         public JObject getClaimGas(string mongodbConnStr, string mongodbDatabase,string address,bool isGetUsed = true)
         {
             decimal issueGas = 0;
@@ -29,12 +72,13 @@ namespace NEO_Block_API.Controllers
 
             //统计有多少NEO UTXO
             long utxoCount = mh.GetDataCount(mongodbConnStr, mongodbDatabase, "utxo", findFliter);
+            if (utxoCount == 0) return new JObject() { { "errorCode", "No data" } };
 
             JObject J = new JObject();
 
             //只有UTXO小于等于50才处理
-            int UTXOThreshold = 50;
-            if (utxoCount <= UTXOThreshold)
+            //int UTXOThreshold = 50;
+            //if (utxoCount <= UTXOThreshold)
             {
                 JArray gasIssueJA = mh.GetData(mongodbConnStr, mongodbDatabase, "utxo", findFliter);
 
@@ -63,12 +107,12 @@ namespace NEO_Block_API.Controllers
                 J.Add("gas", issueGas);
                 J.Add("claims", gasIssueJA);
             }
-            else
+            /*else
             {
                 J.Add("errorCode", "-10");
                 J.Add("errorMsg", "The data is too large to process");
                 J.Add("errorData", "ClaimGas UTXO Threshold is " + UTXOThreshold);
-            }
+            }*/
 
             return J;
         }

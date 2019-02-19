@@ -271,6 +271,20 @@ namespace NEO_Block_API.Controllers
 
                         result = tx.getUtxo2Pay(utxoJA, address, assetID, amount, isBigFirst);
                         break;
+                    case "getclaimgasUtxoList":
+                        if (req.@params.Count() == 1)
+                        {
+                            result = claim.getClaimGasUtxoList(mongodbConnStr, mongodbDatabase, req.@params[0].ToString());
+                        }
+                        else if (req.@params.Count() == 2)
+                        {
+                            result = claim.getClaimGasUtxoList(mongodbConnStr, mongodbDatabase, req.@params[0].ToString(), req.@params[1].ToString() == "1");
+                        }
+                        else if (req.@params.Count() == 4)
+                        {
+                            result = claim.getClaimGasUtxoList(mongodbConnStr, mongodbDatabase, req.@params[0].ToString(), req.@params[1].ToString() == "1", int.Parse(req.@params[2].ToString()), int.Parse(req.@params[3].ToString()));
+                        }
+                        break;
                     case "getclaimgas":
                         JObject claimsJ = new JObject();
                         if (req.@params.Count() == 1)
