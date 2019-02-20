@@ -54,7 +54,7 @@ namespace NEO_Block_API.Controllers
 
         }
 
-        public JObject getClaimGas(string mongodbConnStr, string mongodbDatabase,string address,bool isGetUsed = true)
+        public JObject getClaimGas(string mongodbConnStr, string mongodbDatabase,string address,bool isGetUsed = true, bool isLimit50Flag=true)
         {
             decimal issueGas = 0;
 
@@ -77,8 +77,8 @@ namespace NEO_Block_API.Controllers
             JObject J = new JObject();
 
             //只有UTXO小于等于50才处理
-            //int UTXOThreshold = 50;
-            //if (utxoCount <= UTXOThreshold)
+            int UTXOThreshold = 50;
+            if ((isLimit50Flag && utxoCount <= UTXOThreshold) || !isLimit50Flag)
             {
                 JArray gasIssueJA = mh.GetData(mongodbConnStr, mongodbDatabase, "utxo", findFliter);
 
@@ -107,12 +107,12 @@ namespace NEO_Block_API.Controllers
                 J.Add("gas", issueGas);
                 J.Add("claims", gasIssueJA);
             }
-            /*else
+            else
             {
                 J.Add("errorCode", "-10");
                 J.Add("errorMsg", "The data is too large to process");
                 J.Add("errorData", "ClaimGas UTXO Threshold is " + UTXOThreshold);
-            }*/
+            }
 
             return J;
         }

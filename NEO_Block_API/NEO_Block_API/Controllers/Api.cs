@@ -289,13 +289,13 @@ namespace NEO_Block_API.Controllers
                         JObject claimsJ = new JObject();
                         if (req.@params.Count() == 1)
                         {
-                            claimsJ = claim.getClaimGas(mongodbConnStr, mongodbDatabase, req.@params[0].ToString());
+                            claimsJ = claim.getClaimGas(mongodbConnStr, mongodbDatabase, req.@params[0].ToString(), true); //限制50,默认值
                         };
                         if (req.@params.Count() == 2)
                         {
                             if ((Int64)req.@params[1] == 1)
                             {
-                                claimsJ = claim.getClaimGas(mongodbConnStr, mongodbDatabase, req.@params[0].ToString(), false);
+                                claimsJ = claim.getClaimGas(mongodbConnStr, mongodbDatabase, req.@params[0].ToString(), false); //限制50,默认值
                             }
                         }
                         result = getJAbyJ(claimsJ);
@@ -303,7 +303,7 @@ namespace NEO_Block_API.Controllers
                     case "getclaimtxhex":
                         string addrClaim = (string)req.@params[0];
 
-                        JObject claimgasJ = claim.getClaimGas(mongodbConnStr, mongodbDatabase, addrClaim);
+                        JObject claimgasJ = claim.getClaimGas(mongodbConnStr, mongodbDatabase, addrClaim, true, false);//  不限制50
                         if (claimgasJ["errorCode"] != null)
                         {
                             result = getJAbyJ(claimgasJ);
