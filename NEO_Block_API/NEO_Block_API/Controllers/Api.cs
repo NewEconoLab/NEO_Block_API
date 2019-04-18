@@ -1,12 +1,9 @@
 ﻿using NEO_Block_API.lib;
 using NEO_Block_API.RPC;
 using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Globalization;
 using NEO_Block_API.Services;
 
@@ -25,6 +22,7 @@ namespace NEO_Block_API.Controllers
         Contract ct = new Contract();
         Claim claim = new Claim();
         NotifyService notifyService = null;
+        BlockService blockService = null;
 
         private static Api testApi = new Api("testnet");
         private static Api mainApi = new Api("mainnet");
@@ -45,12 +43,24 @@ namespace NEO_Block_API.Controllers
                         mongodbConnStr = mh.mongodbConnStr_testnet,
                         mongodbDatabase = mh.mongodbDatabase_testnet,
                     };
+                    blockService = new BlockService
+                    {
+                        mh = mh,
+                        mongodbConnStr = mh.mongodbConnStr_testnet,
+                        mongodbDatabase = mh.mongodbDatabase_testnet,
+                    };
                     break;
                 case "mainnet":
                     mongodbConnStr = mh.mongodbConnStr_mainnet;
                     mongodbDatabase = mh.mongodbDatabase_mainnet;
                     neoCliJsonRPCUrl = mh.neoCliJsonRPCUrl_mainnet;
                     notifyService = new NotifyService
+                    {
+                        mh = mh,
+                        mongodbConnStr = mh.mongodbConnStr_mainnet,
+                        mongodbDatabase = mh.mongodbDatabase_mainnet,
+                    };
+                    blockService = new BlockService
                     {
                         mh = mh,
                         mongodbConnStr = mh.mongodbConnStr_mainnet,
@@ -627,6 +637,7 @@ namespace NEO_Block_API.Controllers
                         result = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "NEP5transfer", sortStr, int.Parse(req.@params[0].ToString()), int.Parse(req.@params[1].ToString()));
                         break;
                     case "getnep5transfersbyasset":
+                        /*
                         string str_asset = ((string)req.@params[0]).formatHexStr();
                         findFliter = "{asset:'" + str_asset + "'}";
                         //sortStr = "{'blockindex':1,'txid':1,'n':1}";
@@ -635,6 +646,9 @@ namespace NEO_Block_API.Controllers
                             result = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "NEP5transfer", sortStr, int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()), findFliter);
                         else
                             result = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5transfer",findFliter);
+                            */
+                        //
+                        result = blockService.getnep5transfersbyasset(req.@params[0].ToString().formatHexStr(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
                         break;
                     case "getnep5count":
                         findFliter = "{}";
