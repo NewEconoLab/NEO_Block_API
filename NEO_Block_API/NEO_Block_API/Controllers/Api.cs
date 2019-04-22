@@ -23,6 +23,7 @@ namespace NEO_Block_API.Controllers
         Claim claim = new Claim();
         NotifyService notifyService = null;
         BlockService blockService = null;
+        NeoCliService neoCliService = null;
 
         private static Api testApi = new Api("testnet");
         private static Api mainApi = new Api("mainnet");
@@ -34,6 +35,11 @@ namespace NEO_Block_API.Controllers
             netnode = node;
             switch (netnode) {
                 case "testnet":
+                    neoCliService = new NeoCliService
+                    {
+                        hh = hh,
+                        neoCliJsonRPCUrl = mh.neoCliJsonRPCUrl_testnet
+                    };
                     mongodbConnStr = mh.mongodbConnStr_testnet;
                     mongodbDatabase = mh.mongodbDatabase_testnet;
                     neoCliJsonRPCUrl = mh.neoCliJsonRPCUrl_testnet;
@@ -51,6 +57,11 @@ namespace NEO_Block_API.Controllers
                     };
                     break;
                 case "mainnet":
+                    neoCliService = new NeoCliService
+                    {
+                        hh = hh,
+                        neoCliJsonRPCUrl = mh.neoCliJsonRPCUrl_mainnet
+                    };
                     mongodbConnStr = mh.mongodbConnStr_mainnet;
                     mongodbDatabase = mh.mongodbDatabase_mainnet;
                     neoCliJsonRPCUrl = mh.neoCliJsonRPCUrl_mainnet;
@@ -105,6 +116,22 @@ namespace NEO_Block_API.Controllers
                 point(req.method);
                 switch (req.method)
                 {
+                    case "getRawMemPoolList":
+                        result = neoCliService.getRawMemPoolList();
+                        break;
+                    case "getRawMemPoolGroup":
+                        result = neoCliService.getRawMemPoolGroup();
+                        break;
+                    case "getRawMemPoolCount":
+                        if(req.@params.Length < 1)
+                        {
+                            result = neoCliService.getRawMemPoolCount();
+                        } else
+                        {
+                            result = neoCliService.getRawMemPoolCount(req.@params[0].ToString());
+                        }
+                        
+                        break;
                     case "getnodetype":
                         JArray JA = new JArray
                         {
