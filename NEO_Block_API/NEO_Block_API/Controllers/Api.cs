@@ -335,9 +335,13 @@ namespace NEO_Block_API.Controllers
                                 claimsJ = claim.getClaimGas(mongodbConnStr, mongodbDatabase, req.@params[0].ToString(), false); //限制50,默认值
                             }
                         }
-                        if(req.@params.Count() == 3)
+                        if (req.@params.Count() == 3)
                         {
                             claimsJ = claim.getClaimGas(mongodbConnStr, mongodbDatabase, req.@params[0].ToString(), req.@params[1].ToString() == "0", req.@params[2].ToString() == "0"); //限制50,默认值
+                        }
+                        if (req.@params.Count() == 4)
+                        {
+                            claimsJ = claim.getClaimGas(mongodbConnStr, mongodbDatabase, req.@params[0].ToString(), req.@params[1].ToString() == "0", req.@params[2].ToString() == "0", req.@params[3].ToString() == "0"); //限制50,默认值
                         }
                         result = getJAbyJ(claimsJ);
                         break;

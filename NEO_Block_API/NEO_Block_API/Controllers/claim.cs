@@ -54,7 +54,7 @@ namespace NEO_Block_API.Controllers
 
         }
 
-        public JObject getClaimGas(string mongodbConnStr, string mongodbDatabase,string address,bool isGetUsed = true, bool isLimit50Flag=true)
+        public JObject getClaimGas(string mongodbConnStr, string mongodbDatabase,string address,bool isGetUsed = true, bool isLimit50Flag=true, bool isIgnoreJA=false)
         {
             decimal issueGas = 0;
 
@@ -105,7 +105,10 @@ namespace NEO_Block_API.Controllers
                 }
 
                 J.Add("gas", issueGas);
-                J.Add("claims", gasIssueJA);
+                if(!isIgnoreJA)
+                {
+                    J.Add("claims", gasIssueJA);
+                }
             }
             else
             {
