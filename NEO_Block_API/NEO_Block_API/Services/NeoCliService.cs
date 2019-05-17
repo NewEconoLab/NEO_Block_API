@@ -1,5 +1,6 @@
 ﻿using NEO_Block_API.lib;
 using Newtonsoft.Json.Linq;
+using System.Linq;
 
 namespace NEO_Block_API.Services
 {
@@ -7,6 +8,21 @@ namespace NEO_Block_API.Services
     {
         public httpHelper hh { get; set; }
         public string neoCliJsonRPCUrl { get; set; }
+
+
+        public JArray getTxidFromMemPool(string txid)
+        {
+            if (!txid.StartsWith("0x")) txid = "0x" + txid;
+            var res = HttpPost(neoCliJsonRPCUrl, "getrawmempool", new JArray { });
+            var result = JObject.Parse(res)["result"];
+            if(result != null && result is JArray ja)
+            {
+                int memPoolCount = ja.Count();
+                bool isExistPool = ja.ToList().Any(p => p.ToString() == txid);
+                return new JArray { new JObject { { "isExistPool", isExistPool}, { "memPoolCount", memPoolCount} } };
+            }
+            return new JArray { JObject.Parse(res)["error"] };
+        }
 
         public JArray getRawMemPoolList()
         {

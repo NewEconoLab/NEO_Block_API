@@ -116,6 +116,9 @@ namespace NEO_Block_API.Controllers
                 point(req.method);
                 switch (req.method)
                 {
+                    case "getTxidFromMemPool":
+                        result = neoCliService.getTxidFromMemPool(req.@params[0].ToString());
+                        break;
                     case "getRawMemPoolList":
                         result = neoCliService.getRawMemPoolList();
                         break;
