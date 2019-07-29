@@ -1,4 +1,107 @@
-# NEO_Block_API
-API Server For Neo Block
+# NEL_Scan_API
+[简体中文](#zh) |    [English](#en) 
 
-[API Docs](http://www.xiaoyaoji.cn/share/1H0gjTDtfk)
+<a name="zh">简体中文</a>
+## 概述 :
+本项目提供了一些基础的区块链数据查询接口。例如查询块数据，交易数据等。
+
+## 接口详情 :
+我们将接口文档用小幺鸡进行了整理,详细可以参阅 _[接口文档](http://www.xiaoyaoji.cn/doc/1IoeLt6k57)_
+
+## 部署演示 :
+
+安装git（如果已经安装则跳过） :
+```
+yum install git -y
+```
+
+安装 dotnet sdk :
+```
+rpm -Uvh https://packages.microsoft.com/config/rhel/7/packages-microsoft-prod.rpm
+yum update
+yum install libunwind libicu -y
+yum install dotnet-sdk-2.1.200 -y
+```
+
+通过git将本工程下载到服务器 :
+```
+git clone https://github.com/NewEconoLab/NEO_Block_API.git
+```
+
+修改配置文件放在执行文件下，配置文件大致如下 :
+```json
+{
+  "mongodbConnStr_testnet": "",
+  "mongodbDatabase_testnet": "",
+  "neoCliJsonRPCUrl_testnet": "",
+  "mongodbConnStr_mainnet": "",
+  "mongodbDatabase_mainnet": "",
+  "neoCliJsonRPCUrl_mainnet": "",
+  "mongodbConnStr_NeonOnline": "",
+  "mongodbDatabase_NeonOnline": "",
+
+  "ping_interval_minutes": ,
+  "loop_interval_seconds": ,
+  "startMonitorFlag": "",
+}
+```
+
+编译并运行
+```
+dotnet publish
+cd NEO_Block_API/NEO_Block_API/bin/Debug/netcoreapp2.0
+dotnet NEO_Block_API.dll
+```
+
+
+<a name="en">English</a>
+## Overview :
+This project provides some basic blockchain data query interfaces. For example, query block data, transaction data ……
+
+## Interface details
+We have compiled the interface documentation. For details, please refer to _[Interface details](http://www.xiaoyaoji.cn/doc/2veptPpn9o/edit)_
+
+## Deployment
+
+install git（Skip if already installed） :
+```
+yum install git -y
+```
+
+install dotnet sdk :
+```
+rpm -Uvh https://packages.microsoft.com/config/rhel/7/packages-microsoft-prod.rpm
+yum update
+yum install libunwind libicu -y
+yum install dotnet-sdk-2.1.200 -y
+```
+
+clone to the server :
+```
+git clone https://github.com/NewEconoLab/NEO_Block_API.git
+```
+
+Modify the configuration file under the execution file, the configuration file is roughly as follows:
+```json
+{
+  "mongodbConnStr_testnet": "",
+  "mongodbDatabase_testnet": "",
+  "neoCliJsonRPCUrl_testnet": "",
+  "mongodbConnStr_mainnet": "",
+  "mongodbDatabase_mainnet": "",
+  "neoCliJsonRPCUrl_mainnet": "",
+  "mongodbConnStr_NeonOnline": "",
+  "mongodbDatabase_NeonOnline": "",
+
+  "ping_interval_minutes": ,
+  "loop_interval_seconds": ,
+  "startMonitorFlag": "",
+}
+```
+
+Compile and run :
+```
+dotnet publish
+cd NEO_Block_API/NEO_Block_API/bin/Debug/netcoreapp2.0
+dotnet NEO_Block_API.dll
+```
