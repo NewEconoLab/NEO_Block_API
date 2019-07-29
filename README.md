@@ -52,6 +52,7 @@ dotnet NEO_Block_API.dll
 
 ## 依赖工程 :
 - [爬虫工程](https://github.com/NewEconoLab/NeoBlock-Mongo-Storage)
+- [neo-cli-nel](https://github.com/NewEconoLab/neo-cli-nel) 
 
 <a name="en">English</a>
 ## Overview :
@@ -104,3 +105,4 @@ dotnet NEO_Block_API.dll
 
 ## dependency project :
 - [reptile project](https://github.com/NewEconoLab/NeoBlock-Mongo-Storage)
+- [neo-cli-nel](https://github.com/NewEconoLab/neo-cli-nel) 
