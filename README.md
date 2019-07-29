@@ -34,7 +34,7 @@ git clone https://github.com/NewEconoLab/NEO_Block_API.git
   "mongodbConnStr_testnet": "测试网基础数据库连接地址",
   "mongodbDatabase_testnet": "测试网基础数据库连接名称",
   "neoCliJsonRPCUrl_testnet": "测试网改动后节点请求url",
-  "mongodbConnStr_mainnet": "主网基础数据库连接地址"",
+  "mongodbConnStr_mainnet": "主网基础数据库连接地址",
   "mongodbDatabase_mainnet": "主网基础数据库连接名称",
   "neoCliJsonRPCUrl_mainnet": "主网改动后节点请求url",
   "mongodbConnStr_NeonOnline": "可为空",
