@@ -14,10 +14,10 @@ namespace NEO_Block_API.Services
         public JArray getnep5transfersbyasset(string assetid, int pageNum=1, int pageSize=10)
         {
             string findStr = new JObject() { {"asset", assetid } }.ToString();
-            long count = mh.GetDataCount(mongodbConnStr, mongodbDatabase, "NEP5transfer", findStr);
+            long count = mh.GetDataCount(mongodbConnStr, mongodbDatabase, "Nep5Transfer", findStr);
             if (count == 0) return new JArray();
 
-            var queryRes = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "NEP5transfer", "{}", pageSize, pageNum, findStr);
+            var queryRes = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "Nep5Transfer", "{}", pageSize, pageNum, findStr);
             if (queryRes == null || queryRes.Count == 0) return new JArray { };
 
             long[] blockindexArr = queryRes.Select(p => long.Parse(p["blockindex"].ToString())).ToArray();

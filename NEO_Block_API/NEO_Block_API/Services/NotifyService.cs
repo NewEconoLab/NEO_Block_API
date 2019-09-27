@@ -67,7 +67,7 @@ namespace NEO_Block_API.Services
         {
             var hashs = hashJA.Select(p => p.ToString()).ToArray();
             string findStr = toFilter(hashs, "assetid").ToString();
-            return mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5asset", findStr);
+            return mh.GetData(mongodbConnStr, mongodbDatabase, "Nep5AssetInfo", findStr);
         }
 
         public JArray getBlockInfo(JArray indexJA)

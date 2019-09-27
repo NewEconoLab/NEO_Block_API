@@ -43,7 +43,7 @@ namespace NEO_Block_API
         {
             public Asset(string mongodbConnStr, string mongodbDatabase,string assetID) {
                 mongoHelper mh = new mongoHelper();
-                JArray JA = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5asset", "{assetid:'" + assetID + "'}");
+                JArray JA = mh.GetData(mongodbConnStr, mongodbDatabase, "Nep5AssetInfo", "{assetid:'" + assetID + "'}");
                 JObject J = (JObject)JA[0];
                 assetid = (string)J["assetid"];
                 totalsupply = (string)J["totalsupply"];

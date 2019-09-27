@@ -79,7 +79,6 @@ namespace NEO_Block_API.lib
 
             if (query.Count > 0)
             {
-
                 var jsonWriterSettings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
                 JArray JA = JArray.Parse(query.ToJson(jsonWriterSettings));
                 foreach (JObject j in JA)
