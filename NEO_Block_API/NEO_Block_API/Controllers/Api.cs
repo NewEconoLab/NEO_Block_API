@@ -528,7 +528,8 @@ namespace NEO_Block_API.Controllers
                             jo["assetid"] = nep5States[i]["AssetHash"].ToString();
                             ja.Add(jo);
                         }
-                        return ja;
+                        result = ja;
+                        break;
                     case "getnep5asset":
                         findFliter = "{assetid:'" + ((string)req.@params[0]).formatHexStr() + "'}";
                         result = mh.GetData(mongodbConnStr, mongodbDatabase, "Nep5AssetInfo", findFliter);
