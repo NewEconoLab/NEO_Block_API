@@ -517,124 +517,18 @@ namespace NEO_Block_API.Controllers
                         break;
                     case "getallnep5assetofaddress":
                         string NEP5addr = (string)req.@params[0];
-                        bool isNeedBalance = false;
-                        if (req.@params.Count() > 1)
+                        string findTransferTo = "{ Address:'" + NEP5addr + "'}";
+                        var nep5States = mh.GetData(mongodbConnStr,mongodbDatabase, "Nep5State", findTransferTo);
+                        JArray ja = new JArray();
+                        for (var i = 0; i < nep5States.Count; i++)
                         {
-                            isNeedBalance = ((Int64)req.@params[1] == 1) ? true : false;
+                            JObject jo = new JObject();
+                            jo["balance"] = nep5States[i]["Balance"].ToString();
+                            jo["symbol"] = nep5States[i]["AssetSymbol"].ToString();
+                            jo["assetid"] = nep5States[i]["AssetHash"].ToString();
+                            ja.Add(jo);
                         }
-                        
-                        //按资产汇集收到的钱(仅资产ID)
-                        string findTransferTo = "{ to:'" + NEP5addr + "'}";
-                        JArray transferToJA = mh.GetData(mongodbConnStr, mongodbDatabase, "Nep5Transfer", findTransferTo);
-                        List<NEP5.Transfer> tfts = new List<NEP5.Transfer>();
-                        foreach (JObject tfJ in transferToJA)
-                        {
-                            tfts.Add(new NEP5.Transfer(tfJ));
-                        }
-                        var queryTo = from tft in tfts
-                                    group tft by tft.asset into tftG
-                                    select new { assetid = tftG.Key};
-                        var assetAdds = queryTo.ToList();
-
-                        //如果需要余额，则通过cli RPC批量获取余额
-                        List<NEP5.AssetBalanceOfAddr> addrAssetBalances = new List<NEP5.AssetBalanceOfAddr>();
-                        if (isNeedBalance) {
-                            List<NEP5.AssetBalanceOfAddr> addrAssetBalancesTemp = new List<NEP5.AssetBalanceOfAddr>();
-                            foreach (var assetAdd in assetAdds)
-                            {
-                                string findNep5Asset = "{assetid:'" + assetAdd.assetid + "'}";
-                                JArray Nep5AssetJA = mh.GetData(mongodbConnStr, mongodbDatabase, "Nep5AssetInfo", findNep5Asset);
-                                string Symbol = (string)Nep5AssetJA[0]["symbol"];
-                                resp = hh.Post(neoCliJsonRPCUrl, "{'jsonrpc':'2.0','method':'getcontractstate','params':['" + assetAdd.assetid + "'],'id':1}", System.Text.Encoding.UTF8, 1);
-                                JObject resultJ = (JObject)JObject.Parse(resp)["result"];
-                                if (resultJ == null)
-                                    continue;
-
-                                addrAssetBalancesTemp.Add(new NEP5.AssetBalanceOfAddr(assetAdd.assetid, Symbol, string.Empty));
-                            }
-
-                            List<string> nep5Hashs = new List<string>();
-                            JArray queryParams = new JArray();
-                            byte[] NEP5allAssetOfAddrHash = ThinNeo.Helper.GetPublicKeyHashFromAddress(NEP5addr);
-                            string NEP5allAssetOfAddrHashHex = ThinNeo.Helper.Bytes2HexString(NEP5allAssetOfAddrHash.Reverse().ToArray());
-                            foreach (var abt in addrAssetBalancesTemp)
-                            {
-                                nep5Hashs.Add(abt.assetid);
-                                queryParams.Add(JArray.Parse("['(str)balanceOf',['(hex)" + NEP5allAssetOfAddrHashHex + "']]"));                               
-                            }
-                            JArray NEP5allAssetBalanceJA = (JArray)ct.callContractForTestMulti(neoCliJsonRPCUrl, nep5Hashs, queryParams)["stack"];
-                            var a = Newtonsoft.Json.JsonConvert.SerializeObject(NEP5allAssetBalanceJA);
-                            foreach (var abt in addrAssetBalancesTemp)
-                            {
-                                /// ChangeLog:
-                                /// 升级智能合约带来的数据结构不一致问题，暂时使用try方式临时解决
-                                try
-                                {
-                                    string allBalanceStr = (string)NEP5allAssetBalanceJA[addrAssetBalancesTemp.IndexOf(abt)]["value"];
-                                    string allBalanceType = (string)NEP5allAssetBalanceJA[addrAssetBalancesTemp.IndexOf(abt)]["type"];
-
-                                    //获取NEP5资产信息，获取精度
-                                    NEP5.Asset NEP5asset = new NEP5.Asset(mongodbConnStr, mongodbDatabase, abt.assetid);
-
-                                    abt.balance = NEP5.getNumStrFromStr(allBalanceType, allBalanceStr, NEP5asset.decimals);
-                                } catch (Exception e)
-                                {
-                                    Console.WriteLine(abt.assetid +",ConvertTypeFailed,errMsg:"+e.Message);
-                                    abt.balance = string.Empty;
-                                }
-                            }
-
-                            //去除余额为0的资产
-                            foreach (var abt in addrAssetBalancesTemp)
-                            {
-                                if (abt.balance != string.Empty && abt.balance != "0")
-                                {
-                                    addrAssetBalances.Add(abt);
-                                }
-                            }
-                        }
-
-                        ////按资产汇集支出的钱
-                        //string findTransferFrom = "{ from:'" + NEP5addr + "'}";
-                        //JArray transferFromJA = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5transfer", findTransferFrom);
-                        //List<NEP5.Transfer> tffs = new List<NEP5.Transfer>();
-                        //foreach (JObject tfJ in transferFromJA)
-                        //{
-                        //    tffs.Add(new NEP5.Transfer(tfJ));
-                        //}
-                        //var queryFrom = from tff in tffs
-                        //                group tff by tff.asset into tffG
-                        //            select new { assetid = tffG.Key, sumOfValue = tffG.Sum(m => m.value) };
-                        //var assetRemoves = queryFrom.ToList();
-
-                        ////以支出的钱扣减收到的钱得到余额
-                        //JArray JAadds = JArray.FromObject(assetAdds);
-                        //foreach (JObject Jadd in JAadds) {
-                        //    foreach (var assetRemove in assetRemoves)
-                        //    {
-                        //        if ((string)Jadd["assetid"] == assetRemove.assetid)
-                        //        {
-                        //            Jadd["sumOfValue"] = (decimal)Jadd["sumOfValue"] - assetRemove.sumOfValue;
-                        //            break;
-                        //        }
-                        //    }
-                        //}
-                        //var a = Newtonsoft.Json.JsonConvert.SerializeObject(JAadds);
-
-                        //***********
-                        //经简单测试，仅看transfer记录，所有to减去所有from并不一定等于合约查询得到的地址余额(可能有其他非标方法消耗了余额，尤其是测试网)，废弃这种方法，还是采用调用NEP5合约获取地址余额方法的方式
-                        //这里给出所有该地址收到过的资产hash，可以配合其他接口获取资产信息和余额
-                        //***********
-                        if (!isNeedBalance)
-                        {
-                            result = JArray.FromObject(assetAdds);
-                        }
-                        else
-                        {
-                            result = JArray.FromObject(addrAssetBalances);
-                        }                   
-
-                        break;
+                        return ja;
                     case "getnep5asset":
                         findFliter = "{assetid:'" + ((string)req.@params[0]).formatHexStr() + "'}";
                         result = mh.GetData(mongodbConnStr, mongodbDatabase, "Nep5AssetInfo", findFliter);
