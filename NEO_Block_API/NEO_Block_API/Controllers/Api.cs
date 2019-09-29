@@ -540,6 +540,10 @@ namespace NEO_Block_API.Controllers
                     case "getallnep5asset":
                         findFliter = "{}";
                         result = mh.GetData(mongodbConnStr, mongodbDatabase, "Nep5AssetInfo", findFliter);
+                        for (var i = 0; i < result.Count; i++)
+                        {
+                            result[i]["totalsupply"] = double.Parse((string)result[i]["totalsupply"]) / Math.Pow(10, double.Parse((string)result[i]["decimals"]));
+                        }
                         break;
                     case "getnep5transferbytxid":
                         string txid = ((string)req.@params[0]).formatHexStr();
