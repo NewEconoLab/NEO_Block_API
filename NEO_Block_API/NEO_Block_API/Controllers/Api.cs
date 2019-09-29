@@ -545,7 +545,7 @@ namespace NEO_Block_API.Controllers
                         result = mh.GetData(mongodbConnStr, mongodbDatabase, "Nep5Transfer", findFliter);
                         for (var i = 0; i < result.Count; i++)
                         {
-                            result[i]["value"] = double.Parse((string)result[0]["value"]) / Math.Pow(10,double.Parse((string)result[0]["decimals"]));
+                            result[i]["value"] = double.Parse((string)result[i]["value"]) / Math.Pow(10,double.Parse((string)result[i]["decimals"]));
                         }
                         break;
                     case "getnep5transferbyaddress":
