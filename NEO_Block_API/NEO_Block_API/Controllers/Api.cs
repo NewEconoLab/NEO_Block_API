@@ -533,6 +533,7 @@ namespace NEO_Block_API.Controllers
                     case "getnep5asset":
                         findFliter = "{assetid:'" + ((string)req.@params[0]).formatHexStr() + "'}";
                         result = mh.GetData(mongodbConnStr, mongodbDatabase, "Nep5AssetInfo", findFliter);
+                        result[0]["totalsupply"] = double.Parse((string)result[0]["totalsupply"]) / Math.Pow(10,double.Parse((string)result[0]["decimals"])); 
                         break;
                     case "getallnep5asset":
                         findFliter = "{}";
@@ -542,6 +543,10 @@ namespace NEO_Block_API.Controllers
                         string txid = ((string)req.@params[0]).formatHexStr();
                         findFliter = "{txid:'" + txid + "'}";
                         result = mh.GetData(mongodbConnStr, mongodbDatabase, "Nep5Transfer", findFliter);
+                        for (var i = 0; i < result.Count; i++)
+                        {
+                            result[i]["value"] = double.Parse((string)result[0]["value"]) / Math.Pow(10,double.Parse((string)result[0]["decimals"]));
+                        }
                         break;
                     case "getnep5transferbyaddress":
                         //sortStr = "{'blockindex':1,'txid':1,'n':1}";
