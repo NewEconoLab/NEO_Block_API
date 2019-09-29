@@ -28,6 +28,7 @@ namespace NEO_Block_API.Services
             var res = queryRes.Select(p =>{
                 JObject jo = (JObject)p;
                 string blockindex = jo["blockindex"].ToString();
+                jo["value"] = double.Parse(jo["value"].ToString()) / System.Math.Pow(10,double.Parse(jo["decimals"].ToString()));
                 jo.Add("blocktime", blockindexDict.GetValueOrDefault(blockindex));
                 return jo;
             }).ToArray();
