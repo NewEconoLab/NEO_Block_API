@@ -525,7 +525,7 @@ namespace NEO_Block_API.Controllers
                         for (var i = 0; i < nep5States.Count; i++)
                         {
                             JObject jo = new JObject();
-                            jo["balance"] = double.Parse(nep5States[i]["Balance"].ToString()) /(Math.Pow(10,double.Parse(nep5States[i]["AssetDecimals"].ToString())));
+                            jo["balance"] = double.Parse((string)nep5States[i]["Balance"]["$numberDecimal"]) /(Math.Pow(10,double.Parse((string)nep5States[i]["AssetDecimals"])));
                             jo["symbol"] = nep5States[i]["AssetSymbol"].ToString();
                             jo["assetid"] = nep5States[i]["AssetHash"].ToString();
                             ja.Add(jo);
