@@ -174,6 +174,12 @@ namespace NEO_Block_API.Controllers
                     case "getblock":
                         findFliter = "{index:" + req.@params[0] + "}";
                         result = mh.GetData(mongodbConnStr, mongodbDatabase, "block", findFliter);
+                        var txs = (JArray)result[0]["tx"];
+                        for (var i = 0; i < txs.Count; i++)
+                        {
+                            txs[i]["sys_fee"] = double.Parse((string)txs[i]["sys_fee"]) / Math.Pow(10, 8);
+                            txs[i]["net_fee"] = double.Parse((string)txs[i]["net_fee"]) / Math.Pow(10, 8);
+                        }
                         break;
                     case "getblocktime":
                         findFliter = "{index:" + req.@params[0] + "}";
