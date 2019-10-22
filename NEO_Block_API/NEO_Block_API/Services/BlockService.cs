@@ -30,12 +30,8 @@ namespace NEO_Block_API.Services
                 string blockindex = jo["blockindex"].ToString();
                 jo.Add("blocktime", blockindexDict.GetValueOrDefault(blockindex));
                 return jo;
-            }).ToArray();
+            }).OrderByDescending(p => long.Parse(p["blockindex"].ToString())).ToArray();
             //
-
-
-            
-
             return new JArray { new JObject() {
                 {"count", count },
                 {"list", new JArray { res } }
