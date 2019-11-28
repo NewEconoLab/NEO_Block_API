@@ -17,7 +17,8 @@ namespace NEO_Block_API.Services
             long count = mh.GetDataCount(mongodbConnStr, mongodbDatabase, "NEP5transfer", findStr);
             if (count == 0) return new JArray();
 
-            var queryRes = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "NEP5transfer", "{}", pageSize, pageNum, findStr);
+            var sortStr = new JObject { { "blockindex",-1} }.ToString();
+            var queryRes = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "NEP5transfer", sortStr, pageSize, pageNum, findStr);
             if (queryRes == null || queryRes.Count == 0) return new JArray { };
 
             long[] blockindexArr = queryRes.Select(p => long.Parse(p["blockindex"].ToString())).ToArray();
@@ -30,12 +31,8 @@ namespace NEO_Block_API.Services
                 string blockindex = jo["blockindex"].ToString();
                 jo.Add("blocktime", blockindexDict.GetValueOrDefault(blockindex));
                 return jo;
-            }).ToArray();
+            }).OrderByDescending(p => long.Parse(p["blockindex"].ToString())).ToArray();
             //
-
-
-            
-
             return new JArray { new JObject() {
                 {"count", count },
                 {"list", new JArray { res } }
