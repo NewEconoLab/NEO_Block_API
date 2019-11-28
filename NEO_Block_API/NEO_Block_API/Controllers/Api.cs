@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Globalization;
 using NEO_Block_API.Services;
+using System.Numerics;
 
 namespace NEO_Block_API.Controllers
 {
@@ -650,7 +651,12 @@ namespace NEO_Block_API.Controllers
                         break;
                     case "getnep5asset":
                         findFliter = "{assetid:'" + ((string)req.@params[0]).formatHexStr() + "'}";
-                        result = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5asset", findFliter);
+                        var bytes_totalSupply = (string)ct.callContractForTest(neoCliJsonRPCUrl, new List<string> { (string)req.@params[0] }, new JArray() { JArray.Parse("['(str)totalSupply',[]]") })["stack"][0]["value"];
+                        var totalSupply = new BigInteger(ThinNeo.Helper.HexString2Bytes(bytes_totalSupply));
+                        var data = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5asset", findFliter);
+                        var decimals = (double)data[0]["decimals"];
+                        data[0]["totalSupply"] = (double)totalSupply / Math.Pow(10,decimals);
+                        result = data;
                         break;
                     case "getallnep5asset":
                         findFliter = "{}";
