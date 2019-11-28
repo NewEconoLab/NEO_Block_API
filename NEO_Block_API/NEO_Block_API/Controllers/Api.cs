@@ -655,7 +655,7 @@ namespace NEO_Block_API.Controllers
                         var totalSupply = new BigInteger(ThinNeo.Helper.HexString2Bytes(bytes_totalSupply));
                         var data = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5asset", findFliter);
                         var decimals = (double)data[0]["decimals"];
-                        data[0]["totalSupply"] = (double)totalSupply / Math.Pow(10,decimals);
+                        data[0]["totalsupply"] = decimal.Parse( ((double)totalSupply / Math.Pow(10, decimals)).ToString(),NumberStyles.Float);
                         result = data;
                         break;
                     case "getallnep5asset":
