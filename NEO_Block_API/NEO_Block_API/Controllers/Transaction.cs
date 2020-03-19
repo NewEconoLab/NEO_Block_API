@@ -264,7 +264,24 @@ namespace NEO_Block_API.Controllers
         public JObject sendrawtransaction(string neoCliJsonRPCUrl, string txSigned)
         {
             httpHelper hh = new httpHelper();
-            var resp = hh.Post(neoCliJsonRPCUrl, "{'jsonrpc':'2.0','method':'sendrawtransaction','params':['" + txSigned + "'],'id':1}", System.Text.Encoding.UTF8, 1);
+            //var resp = hh.Post(neoCliJsonRPCUrl, "{'jsonrpc':'2.0','method':'sendrawtransaction','params':['" + txSigned + "'],'id':1}", System.Text.Encoding.UTF8, 1);
+            var resp = hh.Post(neoCliJsonRPCUrl, new JObject {
+                { "jsonrpc", "2.0"},
+                {"method", "sendrawtransaction" },
+                {"params", new JArray{ txSigned } },
+                {"id", 1 },
+            }.ToString(), System.Text.Encoding.UTF8, 1);
+            var resp = hh.Post(neoCliJsonRPCUrl, new JObject {
+                { "jsonrpc", "2.0"},
+                {"method", "sendrawtransaction" },
+                {"params", new JArray{ txSigned } },
+                {"id", 1 },
+            }.ToString(), System.Text.Encoding.UTF8, 1); var resp = hh.Post(neoCliJsonRPCUrl, new JObject {
+                { "jsonrpc", "2.0"},
+                {"method", "sendrawtransaction" },
+                {"params", new JArray{ txSigned } },
+                {"id", 1 },
+            }.ToString(), System.Text.Encoding.UTF8, 1);
 
             JObject Jresult = new JObject();
             bool isSendSuccess = false;

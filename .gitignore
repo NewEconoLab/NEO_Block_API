@@ -263,3 +263,4 @@ paket-files/
 __pycache__/
 *.pyc
 /NEO_Block_API/NEO_Block_API/mongodbsettings.json
+/NEO_Block_API/NEO_Block_API/*.json

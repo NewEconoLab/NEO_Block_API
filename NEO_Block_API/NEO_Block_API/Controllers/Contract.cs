@@ -39,9 +39,14 @@ namespace NEO_Block_API.Controllers
         }
 
         public JObject invokeScript(string neoCliJsonRPCUrl, string script)
-        {          
-            var resp = hh.Post(neoCliJsonRPCUrl, "{'jsonrpc':'2.0','method':'invokescript','params':['" + script + "'],'id':1}", System.Text.Encoding.UTF8, 1);
-
+        {
+            //var resp = hh.Post(neoCliJsonRPCUrl, "{'jsonrpc':'2.0','method':'invokescript','params':['" + script + "'],'id':1}", System.Text.Encoding.UTF8, 1);
+            var resp = hh.Post(neoCliJsonRPCUrl, new JObject {
+                { "jsonrpc", "2.0"},
+                {"method", "invokescript" },
+                {"params", new JArray{ script } },
+                {"id", 1 },
+            }.ToString(), System.Text.Encoding.UTF8, 1);
             JObject resultJ = (JObject)JObject.Parse(resp)["result"];
 
             return resultJ;
