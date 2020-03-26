@@ -15,6 +15,8 @@ namespace NEO_Block_API.Controllers
         private string netnode { get; set; }
         private string mongodbConnStr { get; set; }
         private string mongodbDatabase { get; set; }
+        private string Ana_mongodbConnStr { get; set; }
+        private string Ana_mongodbDatabase { get; set; }
         private string neoCliJsonRPCUrl { get; set; }
 
         httpHelper hh = new httpHelper();
@@ -55,13 +57,16 @@ namespace NEO_Block_API.Controllers
                         mh = mh,
                         mongodbConnStr = mh.mongodbConnStr_testnet,
                         mongodbDatabase = mh.mongodbDatabase_testnet,
+                        neoCliJsonRPCUrl = mh.neoCliJsonRPCUrl_testnet,
+                        Ana_mongodbConnStr = mh.mongodbConnStr_testnet,
+                        Ana_mongodbDatabase = mh.mongodbDatabase_testnet
                     };
                     break;
                 case "mainnet":
                     neoCliService = new NeoCliService
                     {
                         hh = hh,
-                        neoCliJsonRPCUrl = mh.neoCliJsonRPCUrl_mainnet
+                        neoCliJsonRPCUrl = mh.neoCliJsonRPCUrl_mainnet,
                     };
                     mongodbConnStr = mh.mongodbConnStr_mainnet;
                     mongodbDatabase = mh.mongodbDatabase_mainnet;
@@ -77,6 +82,9 @@ namespace NEO_Block_API.Controllers
                         mh = mh,
                         mongodbConnStr = mh.mongodbConnStr_mainnet,
                         mongodbDatabase = mh.mongodbDatabase_mainnet,
+                        neoCliJsonRPCUrl = mh.neoCliJsonRPCUrl_mainnet,
+                        Ana_mongodbConnStr = mh.mongodbConnStr_mainnet,
+                        Ana_mongodbDatabase = mh.mongodbDatabase_mainnet
                     };
                     break;
             }
@@ -530,6 +538,17 @@ namespace NEO_Block_API.Controllers
                         result = getJAbyKV("nep5balance", balanceBigint);
                         break;
                     case "getallnep5assetofaddress":
+                        {
+                            if(req.@params.Length >1)
+                            {
+                                result = blockService.getallnep5assetofaddress(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()));
+                            } else
+                            {
+                                result = blockService.getallnep5assetofaddress(req.@params[0].ToString());
+                            }
+                        }
+                        break;
+                    case "getallnep5assetofaddressOld":
                         string NEP5addr = (string)req.@params[0];
                         bool isNeedBalance = false;
                         if (req.@params.Count() > 1)
