@@ -49,7 +49,7 @@ namespace NEO_Block_API.Services
             var assetArr = assets.Select(p =>
             {
                 var jo = new JObject();
-                jo["asset"] = p;
+                jo["assetid"] = p;
                 jo["symbol"] = getSymbol(p);
                 return jo;
             }).ToArray();
@@ -65,7 +65,7 @@ namespace NEO_Block_API.Services
             JArray queryParams = new JArray();
             foreach (var item in assetArr)
             {
-                var asset = item["asset"].ToString();
+                var asset = item["assetid"].ToString();
                 var newAsset = getNewContractHash(asset);
                 nep5Hashs.Add(newAsset);
                 queryParams.Add(JArray.Parse("['(str)balanceOf',['(hex)" + NEP5allAssetOfAddrHashHex + "']]"));
@@ -81,13 +81,13 @@ namespace NEO_Block_API.Services
                     string allBalanceType = (string)NEP5allAssetBalanceJA[index]["type"];
 
                     //获取NEP5资产信息，获取精度
-                    NEP5.Asset NEP5asset = new NEP5.Asset(mongodbConnStr, mongodbDatabase, abt["asset"].ToString());
+                    NEP5.Asset NEP5asset = new NEP5.Asset(mongodbConnStr, mongodbDatabase, abt["assetid"].ToString());
 
                     abt["balance"] = NEP5.getNumStrFromStr(allBalanceType, allBalanceStr, NEP5asset.decimals);
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(abt["asset"].ToString() + ",ConvertTypeFailed,errMsg:" + e.Message);
+                    Console.WriteLine(abt["assetid"].ToString() + ",ConvertTypeFailed,errMsg:" + e.Message);
                     abt["balance"] = "";
                 }
             }
