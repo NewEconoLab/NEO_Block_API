@@ -25,7 +25,7 @@ namespace NEO_Block_API.Controllers
         Contract ct = new Contract();
         Claim claim = new Claim();
         NotifyService notifyService = null;
-        BlockService blockService = null;
+        AssetService assetService = null;
         NeoCliService neoCliService = null;
 
         private static Api testApi = new Api("testnet");
@@ -52,14 +52,14 @@ namespace NEO_Block_API.Controllers
                         mongodbConnStr = mh.mongodbConnStr_testnet,
                         mongodbDatabase = mh.mongodbDatabase_testnet,
                     };
-                    blockService = new BlockService
+                    assetService = new AssetService
                     {
                         mh = mh,
-                        mongodbConnStr = mh.mongodbConnStr_testnet,
-                        mongodbDatabase = mh.mongodbDatabase_testnet,
+                        block_mongodbConnStr = mh.mongodbConnStr_testnet,
+                        block_mongodbDatabase = mh.mongodbDatabase_testnet,
+                        analy_mongodbConnStr = mh.analy_mongodbConnStr_testnet,
+                        analy_mongodbDatabase = mh.analy_mongodbDatabase_testnet,
                         neoCliJsonRPCUrl = mh.neoCliJsonRPCUrl_testnet,
-                        Ana_mongodbConnStr = mh.mongodbConnStr_testnet,
-                        Ana_mongodbDatabase = mh.mongodbDatabase_testnet
                     };
                     break;
                 case "mainnet":
@@ -77,14 +77,14 @@ namespace NEO_Block_API.Controllers
                         mongodbConnStr = mh.mongodbConnStr_mainnet,
                         mongodbDatabase = mh.mongodbDatabase_mainnet,
                     };
-                    blockService = new BlockService
+                    assetService = new AssetService
                     {
                         mh = mh,
-                        mongodbConnStr = mh.mongodbConnStr_mainnet,
-                        mongodbDatabase = mh.mongodbDatabase_mainnet,
+                        block_mongodbConnStr = mh.mongodbConnStr_mainnet,
+                        block_mongodbDatabase = mh.mongodbDatabase_mainnet,
+                        analy_mongodbConnStr = mh.analy_mongodbConnStr_mainnet,
+                        analy_mongodbDatabase = mh.analy_mongodbDatabase_mainnet,
                         neoCliJsonRPCUrl = mh.neoCliJsonRPCUrl_mainnet,
-                        Ana_mongodbConnStr = mh.mongodbConnStr_mainnet,
-                        Ana_mongodbDatabase = mh.mongodbDatabase_mainnet
                     };
                     break;
             }
@@ -92,27 +92,9 @@ namespace NEO_Block_API.Controllers
             initMonitor();
         }
 
-        private JArray getJAbyKV(string key, object value)
-        {
-            return  new JArray
-                        {
-                            new JObject
-                            {
-                                {
-                                    key,
-                                    value.ToString()
-                                }
-                            }
-                        };
-        }
+        private JArray getJAbyKV(string key, object value) => new JArray { new JObject { { key, value.ToString() } } };
+        private JArray getJAbyJ(JObject J) => new JArray { J };
 
-        private JArray getJAbyJ(JObject J)
-        {
-            return new JArray
-                        {
-                            J
-                        };
-        }
 
         public object getRes(JsonRPCrequest req,string reqAddr)
         {
@@ -537,18 +519,39 @@ namespace NEO_Block_API.Controllers
 
                         result = getJAbyKV("nep5balance", balanceBigint);
                         break;
-                    case "getallnep5assetofaddress":
-                        {
-                            if(req.@params.Length >1)
-                            {
-                                result = blockService.getallnep5assetofaddress(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()));
-                            } else
-                            {
-                                result = blockService.getallnep5assetofaddress(req.@params[0].ToString());
-                            }
-                        }
+                    case "getnep5transfersbyasset":
+                        /**
+                        string str_asset = ((string)req.@params[0]).formatHexStr();
+                        findFliter = "{asset:'" + str_asset + "'}";
+                        //sortStr = "{'blockindex':1,'txid':1,'n':1}";
+                        sortStr = "{}";
+                        if (req.@params.Count() ==3)
+                            result = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "NEP5transfer", sortStr, int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()), findFliter);
+                        else
+                            result = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5transfer",findFliter);
+                            */
+                        result = assetService.getnep5transfersbyasset(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
                         break;
-                    case "getallnep5assetofaddressOld":
+                    case "getnep5count":
+                        /**
+                        findFliter = "{}";
+                        if (req.@params.Count() == 2)
+                        {
+                            string key = (string)req.@params[0];
+                            string value = (string)req.@params[1];
+                            findFliter = "{\"" + key + "\":\"" + value + "\"}";
+                        }
+                        result = getJAbyKV("nep5count", mh.GetDataCount(mongodbConnStr, mongodbDatabase, "NEP5transfer", findFliter));
+                        */
+                        if (req.@params.Length == 2)
+                        {
+                            result = assetService.getnep5count(req.@params[0].ToString(), req.@params[1].ToString());
+                            break;
+                        }
+                        result = assetService.getnep5count();
+                        break;
+                    case "getallnep5assetofaddress":
+                        /**
                         string NEP5addr = (string)req.@params[0];
                         bool isNeedBalance = false;
                         if (req.@params.Count() > 1)
@@ -666,9 +669,17 @@ namespace NEO_Block_API.Controllers
                         {
                             result = JArray.FromObject(addrAssetBalances);
                         }                   
-
+                        */
+                        if (req.@params.Length == 2)
+                        {
+                            result = assetService.getallnep5assetofaddress(
+                                req.@params[0].ToString(), int.Parse(req.@params[1].ToString()));
+                            break;
+                        }
+                        result = assetService.getallnep5assetofaddress(req.@params[0].ToString());
                         break;
                     case "getnep5asset":
+                        /**
                         findFliter = "{assetid:'" + ((string)req.@params[0]).formatHexStr() + "'}";
                         var bytes_totalSupply = (string)ct.callContractForTest(neoCliJsonRPCUrl, new List<string> { (string)req.@params[0] }, new JArray() { JArray.Parse("['(str)totalSupply',[]]") })["stack"][0]["value"];
                         var totalSupply = new BigInteger(ThinNeo.Helper.HexString2Bytes(bytes_totalSupply));
@@ -676,11 +687,19 @@ namespace NEO_Block_API.Controllers
                         var decimals = (double)data[0]["decimals"];
                         data[0]["totalsupply"] = decimal.Parse( ((double)totalSupply / Math.Pow(10, decimals)).ToString(),NumberStyles.Float);
                         result = data;
+                        */
+                        result = assetService.getnep5asset(req.@params[0].ToString());
                         break;
                     case "getallnep5asset":
+                        /**
                         findFliter = "{}";
-                        result = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5asset", findFliter);
+                        result = mh.GetData(block_mongodbConnStr, block_mongodbDatabase, NEP5assetCol, findFliter);
                         break;
+                         */
+                        result = assetService.getallnep5asset();
+                        break;
+
+                        //
                     case "getnep5transferbytxid":
                         string txid = ((string)req.@params[0]).formatHexStr();
                         findFliter = "{txid:'" + txid + "'}";
@@ -699,30 +718,7 @@ namespace NEO_Block_API.Controllers
                         sortStr = "{}";
                         result = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "NEP5transfer", sortStr, int.Parse(req.@params[0].ToString()), int.Parse(req.@params[1].ToString()));
                         break;
-                    case "getnep5transfersbyasset":
-                        /*
-                        string str_asset = ((string)req.@params[0]).formatHexStr();
-                        findFliter = "{asset:'" + str_asset + "'}";
-                        //sortStr = "{'blockindex':1,'txid':1,'n':1}";
-                        sortStr = "{}";
-                        if (req.@params.Count() ==3)
-                            result = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "NEP5transfer", sortStr, int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()), findFliter);
-                        else
-                            result = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5transfer",findFliter);
-                            */
-                        //
-                        result = blockService.getnep5transfersbyasset(req.@params[0].ToString().formatHexStr(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
-                        break;
-                    case "getnep5count":
-                        findFliter = "{}";
-                        if (req.@params.Count() == 2)
-                        {
-                            string key = (string)req.@params[0];
-                            string value = (string)req.@params[1];
-                            findFliter = "{\"" + key + "\":\"" + value + "\"}";
-                        }
-                        result = getJAbyKV("nep5count", mh.GetDataCount(mongodbConnStr, mongodbDatabase, "NEP5transfer", findFliter));
-                        break;
+                    
                     case "getnep5transferbyblockindex":
                         Int64 blockindex = (Int64)req.@params[0];
                         findFliter = "{blockindex:" + blockindex + "}";
