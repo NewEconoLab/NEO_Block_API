@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Globalization;
 using NEO_Block_API.Services;
-using System.Numerics;
 
 namespace NEO_Block_API.Controllers
 {
@@ -15,8 +14,6 @@ namespace NEO_Block_API.Controllers
         private string netnode { get; set; }
         private string mongodbConnStr { get; set; }
         private string mongodbDatabase { get; set; }
-        private string Ana_mongodbConnStr { get; set; }
-        private string Ana_mongodbDatabase { get; set; }
         private string neoCliJsonRPCUrl { get; set; }
 
         httpHelper hh = new httpHelper();

@@ -71,6 +71,10 @@ namespace NEO_Block_API.Services
         public JArray getnep5transfersbyasset(string assetid, int pageNum=1, int pageSize=10)
         {
             assetid = assetid.formatHash();
+            if (hasFormatAssetIdToNext(assetid))
+            {
+                return getRes();
+            }
             var findStr = formatAssetIdToPrevMany(assetid).toFilter("asset").ToString();
             //var findStr = new JObject() { { "asset", assetid } }.ToString();
             var count = mh.GetDataCount(block_mongodbConnStr, block_mongodbDatabase, NEP5transferCol, findStr);
