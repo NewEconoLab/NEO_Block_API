@@ -20,7 +20,15 @@ namespace NEO_Block_API.Controllers
         public JObject getContractState(string neoCliJsonRPCUrl, string scripthash)
         {
             httpHelper hh = new httpHelper();
-            var resp = hh.Post(neoCliJsonRPCUrl, "{'jsonrpc':'2.0','method':'getcontractstate','params':['" + scripthash + "'],'id':1}", System.Text.Encoding.UTF8, 1);
+            //var resp = hh.Post(neoCliJsonRPCUrl, "{'jsonrpc':'2.0','method':'getcontractstate','params':['" + scripthash + "'],'id':1}", System.Text.Encoding.UTF8, 1);
+
+            var resp = hh.Post(neoCliJsonRPCUrl, new JObject {
+                { "jsonrpc", "2.0"},
+                {"method", "getcontractstate" },
+                {"params", new JArray{ scripthash } },
+                {"id", 1 },
+            }.ToString(), System.Text.Encoding.UTF8, 1);
+
 
             JObject resultJ = (JObject)JObject.Parse(resp)["result"];
 
