@@ -18,6 +18,7 @@ namespace NEO_Block_API.Services
         public string NEP5assetCol { get; set; } = "NEP5asset";
         public string NEP5transferCol { get; set; } = "NEP5transfer";
         public string ContractExecDetailCol { get; set; } = "contract_exec_detail";
+        private AssetHelper ah = new AssetHelper();
         //
         public string neoCliJsonRPCUrl { get; set; }
         Contract ct = new Contract();
@@ -40,7 +41,8 @@ namespace NEO_Block_API.Services
             var item = queryRes[0];
             var res = new JObject();
             res["assetid"] = item["assetid"];
-            res["totalsupply"] = item["totalsupply"];
+            //res["totalsupply"] = item["totalsupply"];
+            res["totalsupply"] = ah.getTotalSupply(neoCliJsonRPCUrl, assetid, int.Parse(item["decimals"].ToString()));
             res["name"] = item["name"];
             res["symbol"] = item["symbol"];
             res["decimals"] = item["decimals"];
@@ -208,6 +210,61 @@ namespace NEO_Block_API.Services
 
             var item = queryRes[0];
             return item["symbol"].ToString();
+        }
+    }
+
+
+
+    class AssetHelper
+    {
+        private httpHelper hh = new httpHelper();
+        public AssetHelper()
+        {
+        }
+        public int getDecimals(string neoCliJsonRPCUrl, string assetid)
+        {
+            var scHash = assetid.formatHash();
+            var scMethod = "decimals";
+            var script = scHash.toHexData(scMethod, new string[0]);
+            var res = invokescript(neoCliJsonRPCUrl, script);
+
+            var resStr = "0";
+            try
+            {
+                var type = (((JArray)JObject.Parse(res)["result"]["stack"])[0]["type"].ToString());
+                var value = (((JArray)JObject.Parse(res)["result"]["stack"])[0]["value"].ToString());
+                resStr = NEP5.getNumStrFromStr(type, value, 0);
+            }
+            catch {}
+            return int.Parse(res);
+        }
+        public string getTotalSupply(string neoCliJsonRPCUrl, string assetid, int decimals)
+        {
+            var scHash = assetid.formatHash();
+            var scMethod = "totalSupply";
+            var script = scHash.toHexData(scMethod, new string[0]);
+            var res = invokescript(neoCliJsonRPCUrl, script);
+
+            var resStr = "0";
+            try
+            {
+                var type = (((JArray)JObject.Parse(res)["result"]["stack"])[0]["type"].ToString());
+                var value = (((JArray)JObject.Parse(res)["result"]["stack"])[0]["value"].ToString());
+                resStr = NEP5.getNumStrFromStr(type, value, decimals);
+            }
+            catch { }
+            return resStr;
+        }
+        private string invokescript(string neoCliJsonRPCUrl, string script)
+        {
+            var postData = new JObject {
+                {"jsonrpc", "2.0" },
+                {"method", "invokescript" },
+                {"params", new JArray{ script} },
+                {"id",1 }
+            }.ToString();
+            var res = hh.Post(neoCliJsonRPCUrl, postData, System.Text.Encoding.UTF8, 1);
+            return res;
         }
     }
 

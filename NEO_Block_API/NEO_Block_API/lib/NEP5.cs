@@ -141,7 +141,7 @@ namespace NEO_Block_API
         }
 
         //十六进制转数值（考虑精度调整）
-        private static string getNumStrFromHexStr(string hexStr, int decimals)
+        public static string getNumStrFromHexStr(string hexStr, int decimals)
         {
             //小头换大头
             byte[] bytes = ThinNeo.Helper.HexString2Bytes(hexStr).Reverse().ToArray();

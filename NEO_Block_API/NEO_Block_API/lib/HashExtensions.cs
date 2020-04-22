@@ -3,11 +3,30 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ThinNeo;
 
 namespace NEO_Block_API.lib
 {
     public static class HashExtensions
     {
+        public static string toHexData(this string scHash, string scMethod, string[] scParams)
+        {
+            byte[] data = null;
+            using (ScriptBuilder sb = new ScriptBuilder())
+            {
+                MyJson.JsonNode_Array array = new MyJson.JsonNode_Array();
+                for (var i = 0; i < scParams.Length; i++)
+                {
+                    array.AddArrayValue(scParams[i]);
+                }
+                sb.EmitParamJson(array);
+                sb.EmitPushString(scMethod);
+                sb.EmitAppCall(new Hash160(scHash));
+                data = sb.ToArray();
+            }
+            var script = Helper.Bytes2HexString(data);
+            return script;
+        }
         public static string formatHash(this string hash)
         {
             if (hash.StartsWith("0x")) return hash;
