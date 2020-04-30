@@ -39,9 +39,15 @@ namespace NEO_Block_API.Controllers
         }
 
         public JObject invokeScript(string neoCliJsonRPCUrl, string script)
-        {          
-            var resp = hh.Post(neoCliJsonRPCUrl, "{'jsonrpc':'2.0','method':'invokescript','params':['" + script + "'],'id':1}", System.Text.Encoding.UTF8, 1);
-
+        {
+            //var resp = hh.Post(neoCliJsonRPCUrl, "{'jsonrpc':'2.0','method':'invokescript','params':['" + script + "'],'id':1}", System.Text.Encoding.UTF8, 1);
+            var data = new JObject {
+                { "jsonrpc", "2.0"},
+                { "method", "invokescript"},
+                { "params", new JArray{ script} },
+                { "id", 1},
+            }.ToString();
+            var resp = hh.Post(neoCliJsonRPCUrl, data, System.Text.Encoding.UTF8, 1);
             JObject resultJ = (JObject)JObject.Parse(resp)["result"];
 
             return resultJ;
@@ -69,15 +75,24 @@ namespace NEO_Block_API.Controllers
                 JObject invokeRs = invokeScript(neoCliJsonRPCUrl, invokeSc);
                 /**
                  * JObject 不能存放相同字段，为将其与其他接口调用区分开来，现单端改名为-Multi结尾的方法
-                 */ 
+                 */
                 /*
                 res.Add("script", invokeRs["script"]);
                 res.Add("state", invokeRs["state"]);
                 res.Add("gas_consumed", invokeRs["gas_consumed"]);
                 */
+
+                JObject stack1 = null;
+                if (invokeRs == null)
+                {
+                    stack1 = new JObject();
+                    stack1.Add("type", "FAULT");
+                    stack1.Add("value", "");
+                    stackList.Add(stack1);
+                    continue;
+                }
                 string state = invokeRs["state"].ToString();
                 JArray stack = (JArray)invokeRs["stack"];
-                JObject stack1 = null;
                 if (state.StartsWith("FAULT"))
                 {
                     // 调用合约出错，填充占位
@@ -89,6 +104,7 @@ namespace NEO_Block_API.Controllers
                 {
                     stack1 = (JObject)stack[0];
                 }
+                stack1["hash"] = scripthash;
                 stackList.Add(stack1);
             }
 

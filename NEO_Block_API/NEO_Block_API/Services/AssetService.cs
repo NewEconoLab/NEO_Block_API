@@ -139,7 +139,30 @@ namespace NEO_Block_API.Services
                 queryParams.Add(JArray.Parse("['(str)balanceOf',['(hex)" + NEP5allAssetOfAddrHashHex + "']]"));
             }
 
-            JArray NEP5allAssetBalanceJA = (JArray)ct.callContractForTestMulti(neoCliJsonRPCUrl, nep5Hashs, queryParams)["stack"];
+                JArray NEP5allAssetBalanceJA = (JArray)ct.callContractForTestMulti(neoCliJsonRPCUrl, nep5Hashs, queryParams)["stack"];
+                foreach(var abt in assetArr)
+                {
+                    try
+                    {
+                        var asset = abt["assetid"].ToString();
+                        var item = NEP5allAssetBalanceJA.Where(p => p["hash"].ToString() == asset).ToArray()[0];
+                        if (item["value"] == null) continue;
+                        if (item["value"].ToString() == "") continue;
+                        var allBalanceStr = item["value"].ToString();
+                        var allBalanceType = item["type"].ToString();
+
+                        //获取NEP5资产信息，获取精度
+                        NEP5.Asset NEP5asset = new NEP5.Asset(block_mongodbConnStr, block_mongodbDatabase, abt["assetid"].ToString());
+
+                        abt["balance"] = NEP5.getNumStrFromStr(allBalanceType, allBalanceStr, NEP5asset.decimals);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(abt["assetid"].ToString() + ",ConvertTypeFailed,errMsg:" + e.Message);
+                        abt["balance"] = "";
+                    }
+                }
+            /*
             foreach (var abt in assetArr)
             {
                 try
@@ -159,6 +182,7 @@ namespace NEO_Block_API.Services
                     abt["balance"] = "";
                 }
             }
+            */
             var res = assetArr.Where(p => p["balance"].ToString() != "" && p["balance"].ToString() != "0").ToArray();
 
             return new JArray { res };
