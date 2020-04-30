@@ -183,7 +183,7 @@ namespace NEO_Block_API.Services
                 }
             }
             */
-            var res = assetArr.Where(p => p["balance"].ToString() != "" && p["balance"].ToString() != "0").ToArray();
+            var res = assetArr.Where(p => p["balance"] !=null && p["balance"].ToString() != "" && p["balance"].ToString() != "0").ToArray();
 
             return new JArray { res };
         }
