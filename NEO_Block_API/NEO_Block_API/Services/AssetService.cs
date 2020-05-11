@@ -193,7 +193,7 @@ namespace NEO_Block_API.Services
             var limitCount = 20;
             while (--limitCount >= 0)
             {
-                if (!formatAssetIdAfterUpdate(assetid, out string newAssetId, "to")) break;
+                if (!formatAssetIdAfterUpdate(assetid, out string newAssetId, "from")) break;
                 assetid = newAssetId;
             }
             return assetid;
