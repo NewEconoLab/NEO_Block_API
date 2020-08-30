@@ -527,6 +527,7 @@ namespace NEO_Block_API.Controllers
                         result = getJAbyKV("nep5balance", balanceBigint);
                         break;
                     case "getallnep5assetofaddress":
+                        /*
                         string NEP5addr = (string)req.@params[0];
                         string findTransferTo = "{ Address:'" + NEP5addr + "'}";
                         var nep5States = mh.GetData(mongodbConnStr,mongodbDatabase, "Nep5State", findTransferTo);
@@ -540,6 +541,8 @@ namespace NEO_Block_API.Controllers
                             ja.Add(jo);
                         }
                         result = ja;
+                        */
+                        result = blockService.getAllNep5AssetOfAddress((string)req.@params[0]);
                         break;
                     case "getnep5asset":
                         findFliter = "{assetid:'" + ((string)req.@params[0]).formatHexStr() + "'}";
