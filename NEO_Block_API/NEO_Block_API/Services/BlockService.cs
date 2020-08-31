@@ -12,6 +12,15 @@ namespace NEO_Block_API.Services
         public string mongodbConnStr { get; set; }
         public string mongodbDatabase { get; set; }
 
+        public JArray getnep5asset(string asset)
+        {
+            var hashArr = getRelateHashArr(asset);
+            var hashJOs = hashArr.Select(p => new JObject { { "assetid", p } }).ToArray();
+            var findStr = new JObject { { "$or", new JArray { hashJOs } } }.ToString();
+            var queryRes = mh.GetData(mongodbConnStr, mongodbDatabase, "Nep5AssetInfo", findStr);
+            queryRes[0]["totalsupply"] = double.Parse((string)queryRes[0]["totalsupply"]) / Math.Pow(10, double.Parse((string)queryRes[0]["decimals"]));
+            return queryRes;
+        }
         public JArray getAllNep5AssetOfAddress(string address)
         {
             var findStr = "{ Address:'" + address + "'}";

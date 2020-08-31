@@ -545,9 +545,12 @@ namespace NEO_Block_API.Controllers
                         result = blockService.getAllNep5AssetOfAddress((string)req.@params[0]);
                         break;
                     case "getnep5asset":
+                        /*
                         findFliter = "{assetid:'" + ((string)req.@params[0]).formatHexStr() + "'}";
                         result = mh.GetData(mongodbConnStr, mongodbDatabase, "Nep5AssetInfo", findFliter);
                         result[0]["totalsupply"] = double.Parse((string)result[0]["totalsupply"]) / Math.Pow(10,double.Parse((string)result[0]["decimals"])); 
+                        */
+                        result = blockService.getnep5asset(((string)req.@params[0]).formatHexStr());
                         break;
                     case "getallnep5asset":
                         findFliter = "{}";
