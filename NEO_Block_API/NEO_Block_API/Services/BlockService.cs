@@ -75,7 +75,11 @@ namespace NEO_Block_API.Services
         }
         public JArray getnep5transfersbyasset(string assetid, int pageNum=1, int pageSize=10)
         {
-            string findStr = new JObject() { {"asset", assetid } }.ToString();
+            //string findStr = new JObject() { {"asset", assetid } }.ToString();
+            var hashArr = getRelateHashArr(assetid);
+            var hashJOs = hashArr.Select(p => new JObject { { "asset", p } }).ToArray();
+            var findStr = new JObject { { "$or", new JArray { hashJOs } } }.ToString();
+
             string sortStr = new JObject() { { "blockindex", -1 } }.ToString();
             long count = mh.GetDataCount(mongodbConnStr, mongodbDatabase, "Nep5Transfer", findStr);
             if (count == 0) return new JArray();
