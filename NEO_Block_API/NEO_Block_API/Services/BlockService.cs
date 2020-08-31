@@ -56,7 +56,7 @@ namespace NEO_Block_API.Services
         private string[] getRelateHashArr(string asset)
         {
             var contractId = getContractId(asset);
-            if (contractId == null) return new string[] { asset };
+            if (contractId == -1) return new string[] { asset };
             //
             var findStr = new JObject { { "contractId", contractId } }.ToString();
             var queryRes = mh.GetData(mongodbConnStr, mongodbDatabase, "contract", findStr);
@@ -65,13 +65,13 @@ namespace NEO_Block_API.Services
             return hashArr;
 
         }
-        private string getContractId(string asset)
+        private long getContractId(string asset)
         {
             var findStr = new JObject { { "contractHash", asset } }.ToString();
             var queryRes = mh.GetData(mongodbConnStr, mongodbDatabase, "contract", findStr);
-            if (queryRes.Count == 0) return null;
+            if (queryRes.Count == 0) return -1;
 
-            return queryRes[0]["contractId"].ToString();
+            return long.Parse(queryRes[0]["contractId"].ToString());
         }
         public JArray getnep5transfersbyasset(string assetid, int pageNum=1, int pageSize=10)
         {
