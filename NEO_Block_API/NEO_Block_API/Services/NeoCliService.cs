@@ -13,7 +13,7 @@ namespace NEO_Block_API.Services
         {
             var res = HttpPost(neoCliJsonRPCUrl, "getrawtransaction", new JArray { new JValue(txid), 1 });
             var result = JObject.Parse(res)["result"];
-            return new JArray { result };
+            return new JArray { result }; 
         }
 
         public JArray getTxidFromMemPool(string txid)
