@@ -205,6 +205,7 @@ namespace NEO_Block_API.lib
             }
             catch (Exception ex)
             {
+                System.Console.WriteLine(ex);
                 throw;
             }
             finally

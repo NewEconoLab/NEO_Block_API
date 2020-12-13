@@ -205,6 +205,10 @@ namespace NEO_Block_API.Controllers
                         //findFliter = "{txid:'" + ((string)req.@params[0]).formatHexStr() + "'}";
                         findFliter = "{hash:'" + ((string)req.@params[0]).formatHexStr() + "'}";
                         result = mh.GetData(mongodbConnStr, mongodbDatabase, "tx", findFliter);
+                        if(result.Count == 0)
+                        {
+                            result = neoCliService.getRawTransaction(((string)req.@params[0]).formatHexStr());
+                        }
                         //result[0]["sys_fee"] = double.Parse((string)result[0]["sys_fee"]) / Math.Pow(10,8);
                         result[0]["sys_fee"] = double.Parse((string)result[0]["sysfee"]) / Math.Pow(10, 8);
                         //result[0]["net_fee"] = double.Parse((string)result[0]["net_fee"]) / Math.Pow(10,8);

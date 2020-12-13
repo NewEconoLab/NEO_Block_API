@@ -9,6 +9,12 @@ namespace NEO_Block_API.Services
         public httpHelper hh { get; set; }
         public string neoCliJsonRPCUrl { get; set; }
 
+        public JArray getRawTransaction(string txid)
+        {
+            var res = HttpPost(neoCliJsonRPCUrl, "getrawtransaction", new JArray { new JValue(txid), 1 });
+            var result = JObject.Parse(res)["result"];
+            return new JArray { result };
+        }
 
         public JArray getTxidFromMemPool(string txid)
         {
