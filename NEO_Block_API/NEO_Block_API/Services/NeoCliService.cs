@@ -12,7 +12,9 @@ namespace NEO_Block_API.Services
         public JArray getRawTransaction(string txid)
         {
             var res = HttpPost(neoCliJsonRPCUrl, "getrawtransaction", new JArray { new JValue(txid), 1 });
-            var result = JObject.Parse(res)["result"];
+            var result = (JObject)JObject.Parse(res)["result"];
+            result["txid"] = result["hash"];
+            result.Remove("hash");
             return new JArray { result }; 
         }
 
